@@ -67,7 +67,9 @@ export function Todo() {
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className="shrink-0 pb-1">
-        <h2 className="mb-4 text-lg font-semibold text-gray-800">Todos</h2>
+        <h2 className="text-[var (--foreground)] mb-4 text-lg font-semibold">
+          Todos
+        </h2>
         <TodoInput
           onTodoAdded={handleTodoAdded}
           searchQuery={searchQuery}
@@ -235,7 +237,8 @@ export function TodoItem({
   return (
     <div
       className={cn(
-        "group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all duration-200 hover:bg-gray-50/80",
+        "group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all duration-200",
+        "hover:border-[var (--border)] hover:bg-[var (--hover-bg-subtle)] border border-transparent",
         isChecked && "opacity-60",
         isDeleting && "pointer-events-none opacity-30"
       )}
@@ -244,26 +247,33 @@ export function TodoItem({
         checked={isChecked}
         onCheckedChange={handleToggle}
         disabled={isUpdating}
-        className="data-[state=checked]:border-green-500 data-[state=checked]:bg-green-500"
+        className={cn(
+          "border-[var (--border)] data-[state=checked]:border-[var (--todo-completed)]",
+          "data-[state=checked]:bg-[var (--todo-completed)] data-[state=checked]:text-[var (--background)]"
+        )}
       />
-
       <span
         className={cn(
           "flex-1 text-sm leading-relaxed transition-all duration-200",
-          isChecked ? "text-gray-400 line-through" : "text-gray-700"
+          isChecked
+            ? "text-[var (--muted-foreground)] line-through opacity-60"
+            : "text-[var (--foreground)]"
         )}
       >
         {title}
       </span>
-
       <Button
         variant="ghost"
         size="icon"
-        className="h-7 w-7 p-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:bg-gray-100"
+        className={cn(
+          "h-7 w-7 p-0 opacity-0 transition-all duration-200",
+          "hover:bg-[var (--hover-bg)] group-hover:opacity-100",
+          "hover:border-[var (--border)] hover:text-[var (--destructive)] border border-transparent"
+        )}
         disabled={isDeleting}
         onClick={handleDelete}
       >
-        <Trash2Icon color="red" />
+        <Trash2Icon className="h-4 w-4" />
       </Button>
     </div>
   )

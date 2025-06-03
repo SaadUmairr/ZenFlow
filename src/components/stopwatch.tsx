@@ -1,32 +1,33 @@
 "use client"
 
+import { useCallback, useEffect, useRef, useState } from "react"
 import {
-    allSessionSavedDataAtom,
-    isPomodoroBreakAtom,
-    timerAtom,
+  allSessionSavedDataAtom,
+  isPomodoroBreakAtom,
+  PomodoroDurationsAtom,
+  timerAtom,
 } from "@/context/data"
 import { saveSessionDataIDB } from "@/utils/idb.util"
-import { useAtom, useSetAtom } from "jotai"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import {
-    ChevronDownIcon,
-    ClockIcon,
-    HourglassIcon,
-    PauseIcon,
-    PlayIcon,
-    RotateCcwIcon,
-    StopCircleIcon,
-    TimerIcon,
+  ChevronDownIcon,
+  ClockIcon,
+  HourglassIcon,
+  PauseIcon,
+  PlayIcon,
+  RotateCcwIcon,
+  StopCircleIcon,
+  TimerIcon,
 } from "lucide-react"
-import { useCallback, useEffect, useRef, useState } from "react"
 
 import { formatTimeMain } from "@/lib/utils"
 
 import { Button } from "./ui/button"
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
 
 type Mode = "stopwatch" | "pomodoro" | "countdown"
@@ -58,9 +59,6 @@ const COUNTDOWN_OPTIONS = [
 ]
 
 export function Stopwatch() {
-  const POMO_FOCUS_DURATION = 6 * 1000
-  const POMO_BREAK_DURATION = 30 * 1000
-
   // STATES
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false)
   const [time, setTime] = useAtom(timerAtom)
@@ -89,6 +87,10 @@ export function Stopwatch() {
   // Global states
   const setPomoBreak = useSetAtom(isPomodoroBreakAtom)
   const setSaveAllSession = useSetAtom(allSessionSavedDataAtom)
+  const pomodoroDuration = useAtomValue(PomodoroDurationsAtom)
+
+  const POMO_FOCUS_DURATION = pomodoroDuration.focus
+  const POMO_BREAK_DURATION = pomodoroDuration.break
 
   // Functions
 

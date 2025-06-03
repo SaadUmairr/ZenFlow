@@ -270,7 +270,7 @@ export function Stats() {
                   />
                 </div>
                 <div className="text-muted-foreground text-center text-xs">
-                  Goal: {formatTimeInHours(dailyFocusGoal)} daily
+                  Goal: {formatTimeInHours(dailyFocusGoal)} hours daily
                 </div>
               </div>
             )}
@@ -335,9 +335,8 @@ export function Stats() {
           {/* Today's Progress Bar */}
           {stats.todaysTime > 0 && (
             <div className="w-32 shrink-0">
-              <div className="text-muted-foreground mb-1 text-center text-xs">
-                Daily Goal: {formatTimeInHours(dailyFocusGoal).toFixed(2)}
-                &nbsp; hours
+              <div className="text-muted-foreground text-center text-xs">
+                Goal: {formatTimeInHours(dailyFocusGoal)} hours daily
               </div>
               <div className="bg-secondary h-2 w-full rounded-full">
                 <Progress
