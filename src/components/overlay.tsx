@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react"
 import {
   AllVideosListAtom,
   CurrentlyPlayingMediaAtom,
+  dailyGoalAtom,
   isPomodoroBreakAtom,
   timerAtom,
 } from "@/context/data"
@@ -12,6 +13,7 @@ import {
   clearStoreByName,
   deleteVideoFromList,
   IDB_STORES,
+  setDailyGoalIDB,
   STORES,
   updateVideoList,
 } from "@/utils/idb.util"
@@ -20,10 +22,12 @@ import { useAtom, useAtomValue } from "jotai"
 import {
   Coffee,
   ListMusicIcon,
+  MinusIcon,
   PauseIcon,
   PlayCircleIcon,
   PlusIcon,
   SettingsIcon,
+  SquarePenIcon,
   Trash2Icon,
   VideoIcon,
   XIcon,
@@ -43,6 +47,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,6 +78,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "./ui/sheet"
+
+const ONE_HOUR = 60 * 60 * 1000
+const MAX_FOCUS_TIME = 12 * ONE_HOUR
 
 export function UserSettingNavButton() {
   const storeClearHandler = async (name: IDB_STORES) => {
@@ -527,6 +544,84 @@ export function AllVideoPanel() {
     </>
   )
 }
+
+export function DailyGoalDrawerTrigger({ name = false }: { name?: boolean }) {
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [dailyGoal, setDailyGoal] = useAtom(dailyGoalAtom)
+  const [goal, setGoal] = useState<number>(dailyGoal)
+
+  const formatTimeInHours = useCallback(
+    (ms: number) => ms / (60 * 60 * 1000),
+    []
+  )
+
+  function onClick(adjustment: number) {
+    setGoal(Math.max(ONE_HOUR, Math.min(MAX_FOCUS_TIME, goal + adjustment)))
+  }
+
+  return (
+    <Drawer open={isOpen} onOpenChange={setIsOpen}>
+      <DrawerTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <SquarePenIcon /> {name ? "Daily Goal" : ""}
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent className="min-h-1/4">
+        <DrawerHeader>
+          <DrawerTitle>Move Goal</DrawerTitle>
+          <DrawerDescription>Set your daily focus goal</DrawerDescription>
+        </DrawerHeader>
+        <div className="p-4 pb-0">
+          <div className="flex items-center justify-center space-x-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="btn-theme h-8 w-8 shrink-0 rounded-full"
+              onClick={() => onClick(-(ONE_HOUR / 2))}
+              disabled={goal <= ONE_HOUR}
+            >
+              <MinusIcon />
+              <span className="sr-only">Decrease</span>
+            </Button>
+            <div className="flex-1 text-center">
+              <div className="text-7xl font-bold tracking-tighter">
+                {formatTimeInHours(goal)}
+              </div>
+              <div className="text-muted-foreground text-[0.70rem] uppercase">
+                Hours/day
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              className="btn-theme h-8 w-8 shrink-0 rounded-full"
+              onClick={() => onClick(ONE_HOUR / 2)}
+              disabled={goal >= MAX_FOCUS_TIME}
+            >
+              <PlusIcon />
+              <span className="sr-only">Increase</span>
+            </Button>
+          </div>
+        </div>
+        <DrawerFooter>
+          <Button
+            onClick={() => {
+              setDailyGoal(goal)
+              setDailyGoalIDB(goal)
+              setIsOpen(false)
+            }}
+          >
+            SET MY GOAL
+          </Button>
+          <DrawerClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DrawerClose>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  )
+}
+
 export function PomoBreakOverlay() {
   const [areWeOnBreak, closeBreakOverlay] = useAtom(isPomodoroBreakAtom)
   const [currentQuote, setCurrentQuote] = useState(BREAK_QUOTES[0])

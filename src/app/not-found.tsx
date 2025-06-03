@@ -6,20 +6,20 @@ import Link from "next/link"
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--background)] px-4">
+    <div className="bg-[var (--background)] flex min-h-screen items-center justify-center px-4">
       <div className="text-center">
         <div className="mb-6">
-          <h1 className="mb-2 text-6xl font-bold text-[var(--foreground)] md:text-8xl">
-            4<span className="text-[var(--foreground)]">0</span>4
+          <h1 className="text-[var (--foreground)] mb-2 text-6xl font-bold md:text-8xl">
+            4<span className="text-[var (--foreground)]">0</span>4
           </h1>
-          <div className="text-sm tracking-wider text-[var(--muted-foreground)] uppercase">
+          <div className="text-[var (--muted-foreground)] text-sm tracking-wider uppercase">
             Page Not Found
           </div>
         </div>
 
         {/* Cute Message */}
         <div className="mx-auto mb-8 max-w-md">
-          <h2 className="mb-3 text-xl font-semibold text-[var(--card-foreground)] md:text-2xl">
+          <h2 className="text-[var (--card-foreground)] mb-3 text-xl font-semibold md:text-2xl">
             Oops! Looks like you wandered off your focus path!
           </h2>
         </div>
@@ -31,7 +31,7 @@ export default function NotFound() {
           </Link>
         </div>
 
-        <div className="mt-12 text-xs text-[var(--muted-foreground)] italic">
+        <div className="text-[var (--muted-foreground)] mt-12 text-xs italic">
           "Every moment is a fresh beginning." - T.S. Eliot
         </div>
       </div>

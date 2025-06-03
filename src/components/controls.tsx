@@ -117,18 +117,16 @@ export function PlayerControls() {
           {/* Left side controls */}
           <div className="flex shrink-0 items-center gap-1">
             <Button
-              variant="outline"
               size="sm"
               onClick={() => handleChannelChange("prev")}
-              className="h-8 w-8 transition-all duration-200 hover:scale-105"
+              className="h-8 w-8"
             >
               <SkipBackIcon className="h-3 w-3" />
             </Button>
             <Button
-              variant="outline"
               size="sm"
               onClick={() => setIsPlaying(!isPlaying)}
-              className="h-9 w-9 transition-all duration-200 hover:scale-105"
+              className="h-9 w-9"
             >
               {isPlaying ? (
                 <PauseIcon className="h-4 w-4" />
@@ -137,10 +135,9 @@ export function PlayerControls() {
               )}
             </Button>
             <Button
-              variant="outline"
               size="sm"
               onClick={() => handleChannelChange("next")}
-              className="h-8 w-8 transition-all duration-200 hover:scale-105"
+              className="h-8 w-8"
             >
               <SkipForwardIcon className="h-3 w-3" />
             </Button>
