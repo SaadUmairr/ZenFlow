@@ -5,6 +5,7 @@ import {
   AllVideosListAtom,
   CurrentlyPlayingMediaAtom,
   dailyGoalAtom,
+  isMediaPlayingAtom,
   isPomodoroBreakAtom,
   timerAtom,
 } from "@/context/data"
@@ -183,8 +184,8 @@ function VideoItemComponent({
       <div
         className={`flex items-center rounded-lg border p-3 transition-all duration-200 ${
           isPlaying
-            ? "border-blue-200 bg-blue-50"
-            : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+            ? "border-[--accent] bg-[--accent]/10"
+            : "border-[--border] bg-transparent hover:border-[--muted] hover:bg-[--muted]/10"
         }`}
       >
         {/* Play button */}
@@ -193,7 +194,7 @@ function VideoItemComponent({
           size="sm"
           onClick={() => onPlay(video)}
           className={`mr-3 h-8 w-8 rounded-full p-0 ${
-            isPlaying ? "text-blue-600" : "text-gray-600"
+            isPlaying ? "text-[--accent]" : "text-[--muted-foreground]"
           }`}
         >
           {isPlaying ? (
@@ -205,14 +206,16 @@ function VideoItemComponent({
 
         {/* Video info */}
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-medium text-gray-900">
+          <h3 className="truncate text-sm font-medium text-[--foreground]">
             {video.title}
           </h3>
-          <div className="mt-1 flex items-center gap-1 text-xs text-gray-500">
+          <div className="mt-1 flex items-center gap-1 text-xs text-[--muted-foreground]">
             <VideoIcon className="h-3 w-3" />
             <span>YouTube</span>
             {isPlaying && (
-              <span className="ml-2 font-medium text-blue-600">• Playing</span>
+              <span className="ml-2 font-medium text-[--accent]">
+                • Playing
+              </span>
             )}
           </div>
         </div>
@@ -221,7 +224,7 @@ function VideoItemComponent({
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0 text-gray-400 opacity-0 transition-all duration-200 group-hover:opacity-100 hover:text-red-500"
+          className="h-8 w-8 p-0 text-[--muted-foreground] opacity-0 transition-all duration-200 group-hover:opacity-100 hover:text-[--destructive]"
           onClick={() => onDelete(video.url)}
         >
           <Trash2Icon className="h-4 w-4" />
@@ -340,6 +343,7 @@ export function AddVideoDialog() {
 export function AllVideoPanel() {
   const [videos, setVideos] = useAtom(AllVideosListAtom)
   const [currentVideo, setCurrentVideo] = useAtom(CurrentlyPlayingMediaAtom)
+  const isMediaPlaying = useAtomValue(isMediaPlayingAtom)
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [removeAllDialog, setRemoveAllDialog] = useState<boolean>(false)
   const [searchQuery, setSearchQuery] = useState<string>("")
@@ -368,25 +372,20 @@ export function AllVideoPanel() {
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button variant="outline" size="icon" className="relative">
-            <ListMusicIcon className="h-4 w-4" />
-            {/* {videos.length > 0 && (
-                            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
-                                {videos.length}
-                            </span>
-                        )} */}
+            <ListMusicIcon className="h-4 w-4 text-[var(--foreground)]" />
           </Button>
         </SheetTrigger>
 
-        <SheetContent className="flex h-full w-full flex-col overflow-y-auto px-0 py-0 sm:max-w-lg">
+        <SheetContent className="flex h-full w-full flex-col overflow-y-auto bg-[var(--popover)] px-0 py-0 text-[var(--popover-foreground)] sm:max-w-lg">
           <div className="flex h-full flex-col">
             {/* Header */}
-            <div className="border-b px-6 py-4">
+            <div className="border-b border-[var(--border)] px-6 py-4">
               <SheetHeader className="space-y-2">
-                <SheetTitle className="flex items-center gap-2">
-                  <VideoIcon className="h-5 w-5" />
+                <SheetTitle className="flex items-center gap-2 text-[var(--foreground)]">
+                  <VideoIcon className="h-5 w-5 text-[var(--foreground)]" />
                   Video Library
                 </SheetTitle>
-                <SheetDescription>
+                <SheetDescription className="text-[var(--muted-foreground)]">
                   Manage and play your saved YouTube videos
                 </SheetDescription>
               </SheetHeader>
@@ -398,7 +397,7 @@ export function AllVideoPanel() {
                     placeholder="Search videos..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-9"
+                    className="h-9 border-[var(--input)] bg-transparent text-[var(--foreground)] placeholder-[var(--muted-foreground)]"
                   />
                 </div>
               )}
@@ -411,7 +410,7 @@ export function AllVideoPanel() {
                     variant="outline"
                     size="sm"
                     onClick={() => setRemoveAllDialog(true)}
-                    className="gap-2 text-red-600 hover:text-red-700"
+                    className="gap-2 text-[var(--destructive)] hover:text-[oklch(0.6_0.25_27)]"
                   >
                     <Trash2Icon className="h-4 w-4" />
                     Clear All
@@ -433,13 +432,13 @@ export function AllVideoPanel() {
                         exit={{ opacity: 0 }}
                         className="py-12 text-center"
                       >
-                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-                          <ListMusicIcon className="h-8 w-8 text-gray-400" />
+                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--muted)]">
+                          <ListMusicIcon className="h-8 w-8 text-[var(--muted-foreground)]" />
                         </div>
-                        <h3 className="mb-2 font-medium text-gray-900">
+                        <h3 className="mb-2 font-medium text-[var(--foreground)]">
                           No videos yet
                         </h3>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-[var(--muted-foreground)]">
                           Add some videos to get started
                         </p>
                       </motion.div>
@@ -451,10 +450,10 @@ export function AllVideoPanel() {
                         exit={{ opacity: 0 }}
                         className="py-12 text-center"
                       >
-                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-                          <XIcon className="h-8 w-8 text-gray-400" />
+                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--muted)]">
+                          <XIcon className="h-8 w-8 text-[var(--muted-foreground)]" />
                         </div>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-[var(--muted-foreground)]">
                           No videos match your search
                         </p>
                       </motion.div>
@@ -474,7 +473,9 @@ export function AllVideoPanel() {
                             onPlay={handlePlayVideo}
                             onDelete={handleDeleteVideo}
                             index={index}
-                            isPlaying={currentVideo === video.url}
+                            isPlaying={
+                              currentVideo === video.url && isMediaPlaying
+                            }
                           />
                         ))}
                       </AnimatePresence>
@@ -486,8 +487,8 @@ export function AllVideoPanel() {
 
             {/* Footer */}
             {videos.length > 0 && (
-              <div className="border-t px-6 py-3">
-                <div className="flex items-center justify-between text-sm text-gray-500">
+              <div className="border-t border-[var(--border)] px-6 py-3">
+                <div className="flex items-center justify-between text-sm text-[var(--muted-foreground)]">
                   <span>
                     {filteredVideos.length} of {videos.length} video
                     {videos.length !== 1 ? "s" : ""}
@@ -497,7 +498,7 @@ export function AllVideoPanel() {
                       variant="ghost"
                       size="sm"
                       onClick={() => setSearchQuery("")}
-                      className="h-auto p-1 text-xs"
+                      className="h-auto p-1 text-xs text-[var(--foreground)]"
                     >
                       Clear search
                     </Button>
@@ -511,13 +512,13 @@ export function AllVideoPanel() {
 
       {/* Remove All Dialog */}
       <Dialog open={removeAllDialog} onOpenChange={setRemoveAllDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="border-[var(--border)] bg-[var(--popover)] text-[var(--popover-foreground)] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-600">
+            <DialogTitle className="flex items-center gap-2 text-[var(--destructive)]">
               <Trash2Icon className="h-5 w-5" />
               Remove All Videos?
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-[var(--muted-foreground)]">
               This will permanently delete all {videos.length} video
               {videos.length !== 1 ? "s" : ""} from your library. This action
               cannot be undone.
@@ -527,14 +528,14 @@ export function AllVideoPanel() {
             <Button
               variant="outline"
               onClick={() => setRemoveAllDialog(false)}
-              className="flex-1"
+              className="flex-1 border-[var(--border)] text-[var(--foreground)]"
             >
               Cancel
             </Button>
             <Button
               variant="destructive"
               onClick={handleRemoveAll}
-              className="flex-1"
+              className="flex-1 text-[var(--destructive-foreground)]"
             >
               Remove All
             </Button>

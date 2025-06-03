@@ -32,7 +32,7 @@ export default function NotFound() {
         </div>
 
         <div className="text-[var (--muted-foreground)] mt-12 text-xs italic">
-          "Every moment is a fresh beginning." - T.S. Eliot
+          &apos;Every moment is a fresh beginning.&apos; - T.S. Eliot
         </div>
       </div>
     </div>

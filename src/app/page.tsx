@@ -1,4 +1,3 @@
-import { Github } from "@/components/github"
 import { PomoBreakOverlay, UserSettingNavButton } from "@/components/overlay"
 import { Player } from "@/components/player"
 import { Stats } from "@/components/stats"
@@ -21,7 +20,7 @@ export default function Home() {
             ZEN FLOW
           </h1>
           <div className="ml-auto flex gap-x-4">
-            <Github />
+            {/* <Github /> */}
             <UserSettingNavButton />
             <ThemeDropdown />
           </div>

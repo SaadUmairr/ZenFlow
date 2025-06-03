@@ -16,7 +16,7 @@ import {
   TrendingUpIcon,
 } from "lucide-react"
 
-import { formatDuration, formatTimeMain } from "@/lib/utils"
+import { formatDuration } from "@/lib/utils"
 
 import { DailyGoalDrawerTrigger } from "./overlay"
 import { SessionData } from "./stopwatch"
@@ -169,8 +169,6 @@ export function Stats() {
     }
     return streak
   }
-
-  const formatTime = useCallback(formatTimeMain, [])
 
   const formatTimeInHours = useCallback((time: number) => {
     return time / (60 * 60 * 1000)
