@@ -16,8 +16,9 @@ import {
   TrendingUpIcon,
 } from "lucide-react"
 
-import { formatTimeMain } from "@/lib/utils"
+import { formatDuration, formatTimeMain } from "@/lib/utils"
 
+import { DailyGoalDrawerTrigger } from "./overlay"
 import { SessionData } from "./stopwatch"
 import { Button } from "./ui/button"
 import { Progress } from "./ui/progress"
@@ -74,111 +75,108 @@ export function Stats() {
   }, [sessionGlobal])
 
   const calculateSession = (): UserStats => {
-    let totalFocusTime = 0
-    let totalBreakTime = 0
-    let stopwatchSessions = 0
-    let pomodoroSessions = 0
-    let completedPomodoros = 0
-    let completedBreaks = 0
-    let longestSession = 0
-    let todaysSessions = 0
-    let todaysTime = 0
+    let totalFocus = 0,
+      totalBreak = 0
+    let swSessions = 0,
+      pomoSessions = 0
+    let compPomo = 0,
+      compBreaks = 0
+    let longest = 0,
+      todayCount = 0,
+      todayMs = 0
 
     const now = new Date()
-    const today = new Date(now.getDate(), now.getMonth(), now.getFullYear())
+    const todayStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    ).getTime()
 
-    sessionGlobal.forEach((session) => {
-      const sessionDate = new Date(session.startTime)
-      const totalDuration = session.actualFocusTime
+    for (const session of sessionGlobal) {
+      const start = new Date(session.startTime)
+      const duration = session.actualFocusTime
+      longest = Math.max(longest, duration)
 
+      // count stopwatch/countdown
       if (session.mode === "stopwatch" || session.mode === "countdown") {
-        stopwatchSessions++
-        totalFocusTime += totalDuration
+        swSessions++
+        totalFocus += duration
       } else if (session.mode === "pomodoro") {
-        pomodoroSessions++
-        if (!session.completedFocusSession || !session.completedBreaks) return
-        const focusTime = (completedPomodoros +=
-          session.completedFocusSession * pomodoroDurations.focus)
-        const breakTime = (completedBreaks +=
-          session.completedBreaks * pomodoroDurations.break)
-
-        totalFocusTime += focusTime
-        totalBreakTime += breakTime
+        pomoSessions++
+        if (!session.completedFocusSession || !session.completedBreaks) {
+          continue
+        }
+        compPomo += session.completedFocusSession
+        compBreaks += session.completedBreaks
+        totalFocus += session.completedFocusSession * pomodoroDurations.focus
+        totalBreak += session.completedBreaks * pomodoroDurations.break
       }
 
-      longestSession = Math.max(longestSession, totalDuration)
-
-      if (loading)
-        if (sessionDate === today) {
-          // Today's stats
-          todaysSessions++
-          todaysTime += totalDuration
-        }
-    })
+      // today’s stats
+      const sessionDay = new Date(
+        start.getFullYear(),
+        start.getMonth(),
+        start.getDate()
+      ).getTime()
+      if (sessionDay === todayStart) {
+        todayCount++
+        todayMs += duration
+      }
+    }
 
     const totalSessions = sessionGlobal.length
-    const averageSessionDuration =
-      totalSessions > 0 ? (totalFocusTime + totalBreakTime) / totalSessions : 0
-
-    const currentStreak = calculateStreak(sessionGlobal)
+    const avgMs =
+      totalSessions > 0
+        ? Math.floor((totalFocus + totalBreak) / totalSessions)
+        : 0
 
     return {
       totalSessions,
-      totalFocusTime,
-      totalBreakTime,
-      stopwatchSessions,
-      pomodoroSessions,
-      completedPomodoros,
-      completedBreaks,
-      longestSession,
-      todaysSessions,
-      todaysTime,
-      averageSessionDuration,
-      currentStreak,
+      totalFocusTime: totalFocus,
+      totalBreakTime: totalBreak,
+      stopwatchSessions: swSessions,
+      pomodoroSessions: pomoSessions,
+      completedPomodoros: compPomo,
+      completedBreaks: compBreaks,
+      longestSession: longest,
+      todaysSessions: todayCount,
+      todaysTime: todayMs,
+      averageSessionDuration: avgMs,
+      currentStreak: calculateStreak(sessionGlobal),
     }
   }
 
-  const calculateStreak = (sessions: SessionData[]): number => {
-    if (sessionGlobal.length === 0) return 0
-    const sessionDates = new Set(
-      sessions.map((session) => {
-        const date = new Date(session.startTime)
-        return new Date(
-          date.getDate(),
-          date.getMonth(),
-          date.getFullYear()
-        ).getTime()
+  function calculateStreak(sessions: SessionData[]) {
+    const dates = new Set(
+      sessions.map((s) => {
+        const d = new Date(s.startTime)
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
       })
     )
-    const sortedDates = Array.from(sessionDates).sort((a, b) => b - a)
 
     const today = new Date()
-    const todayTime = new Date(
-      today.getDate(),
+    let current = new Date(
+      today.getFullYear(),
       today.getMonth(),
-      today.getFullYear()
+      today.getDate()
     ).getTime()
 
     let streak = 0
-    let currentDate = todayTime
-
-    for (const sessionDate of sortedDates) {
-      if (sessionDate === currentDate) {
-        streak++
-        currentDate -= 24 * 60 * 60 * 1000
-      } else if (sessionDate < currentDate - 24 * 60 * 60 * 1000) {
-        break
-      }
+    // walk backwards day by day
+    while (dates.has(current)) {
+      streak++
+      current -= 24 * 60 * 60 * 1000
     }
-
     return streak
   }
 
   const formatTime = useCallback(formatTimeMain, [])
 
   const formatTimeInHours = useCallback((time: number) => {
-    return time / (24 * 60 * 60 * 1000)
+    return time / (60 * 60 * 1000)
   }, [])
+
+  const formatDurationCB = useCallback(formatDuration, [])
 
   if (loading) {
     return (
@@ -214,7 +212,7 @@ export function Stats() {
             <div className="bg-background rounded-lg p-3 text-center">
               <ClockIcon className="mx-auto mb-1 h-6 w-6 text-blue-500" />
               <div className="text-lg font-bold">
-                {formatTime(stats.totalFocusTime)}
+                {formatDurationCB(stats.totalFocusTime)}
               </div>
               <div className="text-muted-foreground text-xs">Focus Time</div>
             </div>
@@ -231,7 +229,7 @@ export function Stats() {
             <div className="bg-background rounded-lg p-3 text-center">
               <CalendarIcon className="mx-auto mb-1 h-6 w-6 text-purple-500" />
               <div className="text-lg font-bold">
-                {formatTime(stats.todaysTime)}
+                {formatDurationCB(stats.todaysTime)}
               </div>
               <div className="text-muted-foreground text-xs">Today</div>
             </div>
@@ -254,12 +252,6 @@ export function Stats() {
                   <span className="text-muted-foreground">Completed:</span>
                   <span>{stats.completedPomodoros}</span>
                 </div>
-                {/* <div className="flex justify-between">
-                                    <span className="text-muted-foreground">
-                                        Pauses:
-                                    </span>
-                                    <span>{stats.totalPauses}</span>
-                                </div> */}
               </div>
             </div>
 
@@ -267,7 +259,7 @@ export function Stats() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">Daily Progress</span>
-                  <span>{formatTime(stats.todaysTime)}</span>
+                  <span> {formatDurationCB(stats.todaysTime)}</span>
                 </div>
                 <div className="bg-secondary h-1.5 w-full rounded-full">
                   <div
@@ -286,7 +278,7 @@ export function Stats() {
               <Button variant="ghost" size="icon">
                 <ChartAreaIcon /> Graph
               </Button>
-              {/* <DailyGoalDrawerTrigger name /> */}
+              <DailyGoalDrawerTrigger name />
             </div>
           </div>
         </div>
@@ -300,7 +292,7 @@ export function Stats() {
               <div className="mb-1 flex items-center gap-1">
                 <ClockIcon className="h-3 w-3 text-blue-500" />
                 <div className="text-lg font-bold">
-                  {formatTime(stats.totalFocusTime)}
+                  {formatDurationCB(stats.totalFocusTime)}
                 </div>
               </div>
               <div className="text-muted-foreground text-xs">Focus</div>
@@ -326,7 +318,7 @@ export function Stats() {
               <div className="mb-1 flex items-center gap-1">
                 <CalendarIcon className="h-3 w-3 text-purple-500" />
                 <div className="text-lg font-bold">
-                  {formatTime(stats.todaysTime)}
+                  {formatDurationCB(stats.todaysTime)}
                 </div>
               </div>
               <div className="text-muted-foreground text-xs">Today</div>
@@ -337,25 +329,30 @@ export function Stats() {
             <Button variant="ghost" size="icon">
               <ChartAreaIcon />
             </Button>
-            {/* <DailyGoalDrawerTrigger /> */}
+            <DailyGoalDrawerTrigger />
           </div>
 
           {/* Today's Progress Bar */}
           {stats.todaysTime > 0 && (
             <div className="w-32 shrink-0">
               <div className="text-muted-foreground mb-1 text-center text-xs">
-                Daily Goal: {formatTimeInHours(dailyFocusGoal)} hours
+                Daily Goal: {formatTimeInHours(dailyFocusGoal).toFixed(2)}
+                &nbsp; hours
               </div>
               <div className="bg-secondary h-2 w-full rounded-full">
                 <Progress
                   value={Math.min(
                     100,
-                    (stats.todaysTime / (2 * 60 * 60 * 1000)) * 100
+                    (stats.todaysTime / dailyFocusGoal) * 100
                   )}
                 />
               </div>
               <div className="text-muted-foreground mt-1 text-center text-xs">
-                {Math.round((stats.todaysTime / (2 * 60 * 60 * 1000)) * 100)}%
+                {Math.min(
+                  100,
+                  Math.round((stats.todaysTime / dailyFocusGoal) * 100)
+                )}
+                %
               </div>
             </div>
           )}
