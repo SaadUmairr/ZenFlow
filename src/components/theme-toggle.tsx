@@ -30,7 +30,7 @@ export function ThemeDropdown() {
             className="flex items-center justify-between capitalize"
           >
             {t}
-            {theme === t && <Check className="h-4 w-4 text-green-500" />}
+            {theme === t && <Check className="h-4 w-4 text-[var(--primary)]" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

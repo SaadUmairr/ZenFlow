@@ -43,6 +43,7 @@ export interface PomodoroStats {
 export interface SessionData extends Partial<PomodoroStats> {
   id: string
   mode: Mode
+  date: string
   startTime: number
   endTime: number
   wasCompleted: boolean
@@ -73,7 +74,7 @@ export function Stopwatch() {
   // Session States
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null)
-  const [, setPomodoroStats] = useState<PomodoroStats>({
+  const [pomodoroStats, setPomodoroStats] = useState<PomodoroStats>({
     completedFocusSession: 0,
     completedBreaks: 0,
     cycleStartTime: 0,
@@ -111,11 +112,14 @@ export function Stopwatch() {
       setPauseStartTime(null)
       setIsPaused(false)
 
-      if (mode === "pomodoro")
-        setPomodoroStats((prev) => ({
-          ...prev,
+      if (mode === "pomodoro") {
+        setPomodoroStats({
+          completedFocusSession: 0,
+          completedBreaks: 0,
           cycleStartTime: now,
-        }))
+          cycleEndTime: 0,
+        })
+      }
     } catch {
       console.error("Error starting new session")
     }
@@ -140,12 +144,23 @@ export function Stopwatch() {
         const sessionData: SessionData = {
           id: sessionId,
           mode,
+          date: new Date(now).toISOString().split("T")[0],
           startTime: sessionStartTime,
           endTime: now,
           wasCompleted,
           totalPauseTime: finalPauseTime,
           actualFocusTime: Math.max(0, actualFocusTime),
         }
+
+        // Add Pomodoro stats if in Pomodoro mode
+        if (mode === "pomodoro") {
+          sessionData.completedFocusSession =
+            pomodoroStats.completedFocusSession
+          sessionData.completedBreaks = pomodoroStats.completedBreaks
+          sessionData.cycleStartTime = pomodoroStats.cycleStartTime
+          sessionData.cycleEndTime = now
+        }
+
         await saveSessionDataIDB(sessionData)
         setSaveAllSession((prev) => [...prev, sessionData])
       } catch (error) {
@@ -158,7 +173,15 @@ export function Stopwatch() {
         setIsPaused(false)
       }
     },
-    [sessionId, sessionStartTime, totalPauseTime, isPaused, pauseStartTime]
+    [
+      sessionId,
+      sessionStartTime,
+      totalPauseTime,
+      isPaused,
+      pauseStartTime,
+      mode,
+      pomodoroStats,
+    ]
   )
 
   const startStopwatch = useCallback(async () => {
@@ -276,6 +299,7 @@ export function Stopwatch() {
 
     try {
       if (pomodoroPhase === "focus") {
+        // Increment completed focus sessions
         setPomodoroStats((prev) => ({
           ...prev,
           completedFocusSession: prev.completedFocusSession + 1,
@@ -285,6 +309,7 @@ export function Stopwatch() {
         setPomodoroPhase("break")
         setTime(POMO_BREAK_DURATION)
       } else if (pomodoroPhase === "break") {
+        // Increment completed breaks
         setPomodoroStats((prev) => ({
           ...prev,
           completedBreaks: prev.completedBreaks + 1,
@@ -293,6 +318,58 @@ export function Stopwatch() {
         setPomoBreak(false)
         setPomodoroPhase("focus")
         setTime(POMO_FOCUS_DURATION)
+      }
+      if (sessionId && sessionStartTime) {
+        const now = Date.now()
+        let finalPauseTime = totalPauseTime
+        if (isPaused && pauseStartTime) {
+          finalPauseTime += now - pauseStartTime
+        }
+
+        const totalSessionDuration = now - sessionStartTime
+        const actualFocusTime = totalSessionDuration - finalPauseTime
+
+        const updatedStats = {
+          ...pomodoroStats,
+          completedFocusSession:
+            pomodoroPhase === "focus"
+              ? pomodoroStats.completedFocusSession + 1
+              : pomodoroStats.completedFocusSession,
+          completedBreaks:
+            pomodoroPhase === "break"
+              ? pomodoroStats.completedBreaks + 1
+              : pomodoroStats.completedBreaks,
+        }
+
+        const sessionData: SessionData = {
+          id: sessionId,
+          mode: "pomodoro",
+          date: new Date(now).toISOString().split("T")[0],
+          startTime: sessionStartTime,
+          endTime: now,
+          wasCompleted: false,
+          totalPauseTime: finalPauseTime,
+          actualFocusTime: Math.max(0, actualFocusTime),
+          completedFocusSession: updatedStats.completedFocusSession,
+          completedBreaks: updatedStats.completedBreaks,
+          cycleStartTime: updatedStats.cycleStartTime,
+          cycleEndTime: 0,
+        }
+
+        // Update the session in IndexedDB
+        await saveSessionDataIDB(sessionData)
+
+        // Update the global state
+        setSaveAllSession((prev) => {
+          const index = prev.findIndex((s) => s.id === sessionId)
+          if (index >= 0) {
+            const newSessions = [...prev]
+            newSessions[index] = sessionData
+            return newSessions
+          } else {
+            return [...prev, sessionData]
+          }
+        })
       }
     } catch (error) {
       console.error("Error in phase transition:", error)
@@ -308,6 +385,13 @@ export function Stopwatch() {
     POMO_BREAK_DURATION,
     POMO_FOCUS_DURATION,
     setPomoBreak,
+    pomodoroStats,
+    sessionId,
+    sessionStartTime,
+    totalPauseTime,
+    isPaused,
+    pauseStartTime,
+    setSaveAllSession,
   ])
 
   const handleCountdownEnd = useCallback(async () => {
@@ -389,7 +473,6 @@ export function Stopwatch() {
     handlePomodoroPhaseEnd,
     handleCountdownEnd,
   ])
-
   return (
     <>
       <div className="flex h-full w-full items-center justify-center">

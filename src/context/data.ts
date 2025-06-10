@@ -22,8 +22,6 @@ export const CurrentlyPlayingMediaAtom = atom<string>(LOFI_CHANNELS[0].url)
 
 export const dailyGoalAtom = atom<number>(2 * ONE_HOUR)
 
-export const hideVideoPlayerAtom = atom<boolean>(false)
-
 export const timerAtom = atom<number>(0)
 
 export const isPomodoroBreakAtom = atom<boolean>(false)

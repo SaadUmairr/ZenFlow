@@ -21,6 +21,7 @@ export default function Home() {
           </h1>
           <div className="ml-auto flex gap-x-4">
             {/* <Github /> */}
+            {/* <BeatsContainer /> */}
             <UserSettingNavButton />
             <ThemeDropdown />
           </div>

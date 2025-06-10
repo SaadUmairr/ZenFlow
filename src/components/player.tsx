@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic"
 import {
   CurrentlyPlayingMediaAtom,
-  hideVideoPlayerAtom,
   isMediaPlayingAtom,
   MediaProgressAtom,
   playerVolumeAtom,
@@ -18,12 +17,11 @@ const ReactPlayer = dynamic(() => import("react-player/youtube"), {
   ssr: false,
 })
 
-export function Player() {
+export function Player({ hidden = false }: { hidden?: boolean }) {
   const currentChannel = useAtomValue(CurrentlyPlayingMediaAtom)
   const volume = useAtomValue(playerVolumeAtom)
   const setVideoProgress = useSetAtom(MediaProgressAtom)
   const [isMediaPlaying, setIsMediaPlaying] = useAtom(isMediaPlayingAtom)
-  const hideMediaPlayer = useAtomValue(hideVideoPlayerAtom)
 
   return (
     <>
@@ -32,7 +30,7 @@ export function Player() {
           <div
             className={cn(
               "relative h-full w-full overflow-hidden rounded-lg border-4 border-gray-300 shadow-md",
-              hideMediaPlayer ? "hidden" : ""
+              hidden ? "hidden" : ""
             )}
           >
             <ReactPlayer
