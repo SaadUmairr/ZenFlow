@@ -35,6 +35,7 @@ export function Player({ hidden = false }: { hidden?: boolean }) {
           >
             <ReactPlayer
               loop
+              style={{ borderRadius: "var(--radius)", overflow: "hidden" }}
               url={currentChannel}
               width="100%"
               height="100%"

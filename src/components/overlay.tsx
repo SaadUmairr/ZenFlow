@@ -62,7 +62,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -104,7 +103,7 @@ export function UserSettingNavButton() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuLabel>Settings</DropdownMenuLabel>
+        {/* <DropdownMenuLabel>Settings</DropdownMenuLabel> */}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => storeClearHandler("session")}>
           Clear Stats

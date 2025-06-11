@@ -28,7 +28,7 @@ export const isPomodoroBreakAtom = atom<boolean>(false)
 
 export const PomodoroDurationsAtom = atom<PomodoroDurationType>({
   focus: 25 * 60 * 1000,
-  break: 5 * 6 * 1000,
+  break: 5 * 60 * 1000,
 })
 
 export const allSessionSavedDataAtom = atom<SessionData[]>([])

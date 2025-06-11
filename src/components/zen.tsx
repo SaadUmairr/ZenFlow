@@ -9,7 +9,7 @@ interface ZenFlowLogoProps {
 export function ZenFlowLogo({ className = "" }: ZenFlowLogoProps) {
   return (
     <motion.div
-      className={`border-[var (--border)] bg-[var (--foreground)] mr-2 h-8 w-8 rounded-full border-2 ${className}`}
+      className={`mr-2 h-8 w-8 rounded-full border-2 border-[var(--border)] bg-[var(--accent)] ${className}`}
       whileHover={{
         scale: [1, 1.1, 1, 1.05, 1],
         transition: {

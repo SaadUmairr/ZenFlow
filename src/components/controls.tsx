@@ -119,14 +119,14 @@ export function PlayerControls() {
             <Button
               size="sm"
               onClick={() => handleChannelChange("prev")}
-              className="h-8 w-8"
+              className="hover:bg-accent hover:text-accent-foreground h-8 w-8 transition-colors"
             >
               <SkipBackIcon className="h-3 w-3" />
             </Button>
             <Button
               size="sm"
               onClick={() => setIsPlaying(!isPlaying)}
-              className="h-9 w-9"
+              className="hover:bg-accent hover:text-accent-foreground h-9 w-9 transition-colors"
             >
               {isPlaying ? (
                 <PauseIcon className="h-4 w-4" />
@@ -137,7 +137,7 @@ export function PlayerControls() {
             <Button
               size="sm"
               onClick={() => handleChannelChange("next")}
-              className="h-8 w-8"
+              className="hover:bg-accent hover:text-accent-foreground h-8 w-8 transition-colors"
             >
               <SkipForwardIcon className="h-3 w-3" />
             </Button>
@@ -154,7 +154,7 @@ export function PlayerControls() {
                 variant="outline"
                 size="icon"
                 onClick={handleMuteToggle}
-                className="relative z-10 transition-all duration-300 hover:scale-105"
+                className="hover:bg-accent hover:text-accent-foreground border-border relative z-10 transition-all duration-300 hover:scale-105"
               >
                 <motion.div
                   initial={false}
@@ -201,17 +201,16 @@ export function PlayerControls() {
                       damping: 30,
                       duration: 0.3,
                     }}
-                    className="bg-background/95 absolute left-full z-20 ml-2 flex items-center gap-3 rounded-lg border p-3 shadow-xl backdrop-blur-md"
+                    className="border-border bg-popover/95 absolute left-full z-20 ml-2 flex items-center gap-3 rounded-lg border p-3 shadow-xl backdrop-blur-md"
                     style={{
                       backdropFilter: "blur(12px)",
-                      background: "rgba(255, 255, 255, 0.95)",
                     }}
                   >
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleVolumeChange("down")}
-                      className="h-7 w-7 transition-all duration-200 hover:scale-110 hover:bg-red-50"
+                      className="hover:bg-destructive/10 hover:text-destructive border-border h-7 w-7 transition-all duration-200 hover:scale-110"
                     >
                       <MinusIcon className="h-3 w-3" />
                     </Button>
@@ -223,18 +222,18 @@ export function PlayerControls() {
                         onValueChange={handleSliderChange}
                         max={100}
                         step={1}
-                        className="flex-1"
+                        className="[&_[role=slider]]:bg-primary [&_[role=slider]]:border-primary-foreground [&_.slider-track]:bg-muted [&_.slider-range]:bg-primary flex-1"
                       />
                       <motion.span
                         className="text-muted-foreground min-w-[32px] shrink-0 text-xs font-medium"
                         key={volume[0]}
                         initial={{
                           scale: 1.2,
-                          color: "#3b82f6",
+                          color: "hsl(var(--primary))",
                         }}
                         animate={{
                           scale: 1,
-                          color: "#6b7280",
+                          color: "hsl(var(--muted-foreground))",
                         }}
                         transition={{ duration: 0.2 }}
                       >
@@ -246,7 +245,7 @@ export function PlayerControls() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleVolumeChange("up")}
-                      className="h-7 w-7 transition-all duration-200 hover:scale-110 hover:bg-green-50"
+                      className="hover:bg-accent/20 hover:text-accent-foreground border-border h-7 w-7 transition-all duration-200 hover:scale-110"
                     >
                       <PlusIcon className="h-3 w-3" />
                     </Button>
@@ -282,7 +281,7 @@ export function PlayerControls() {
                 value={[videoProgress * 100]}
                 max={100}
                 step={0.1}
-                className="w-full"
+                className="[&_[role=slider]]:bg-primary [&_[role=slider]]:border-primary-foreground [&_.slider-track]:bg-muted [&_.slider-range]:bg-primary w-full"
               />
             </motion.div>
 
@@ -308,7 +307,7 @@ export function PlayerControls() {
               variant="outline"
               size="sm"
               onClick={() => handleChannelChange("prev")}
-              className="h-8 w-8"
+              className="hover:bg-accent hover:text-accent-foreground border-border h-8 w-8 transition-colors"
             >
               <SkipBackIcon className="h-3 w-3" />
             </Button>
@@ -316,7 +315,7 @@ export function PlayerControls() {
               variant="outline"
               size="sm"
               onClick={() => setIsPlaying(!isPlaying)}
-              className="h-9 w-9"
+              className="hover:bg-accent hover:text-accent-foreground border-border h-9 w-9 transition-colors"
             >
               {isPlaying ? (
                 <PauseIcon className="h-4 w-4" />
@@ -328,7 +327,7 @@ export function PlayerControls() {
               variant="outline"
               size="sm"
               onClick={() => handleChannelChange("next")}
-              className="h-8 w-8"
+              className="hover:bg-accent hover:text-accent-foreground border-border h-8 w-8 transition-colors"
             >
               <SkipForwardIcon className="h-3 w-3" />
             </Button>
@@ -339,7 +338,7 @@ export function PlayerControls() {
               variant="outline"
               size="icon"
               onClick={handleMuteToggle}
-              className="h-8 w-8"
+              className="hover:bg-accent hover:text-accent-foreground border-border h-8 w-8 transition-colors"
             >
               {volume[0] === 0 ? (
                 <VolumeOffIcon className="h-3 w-3" />
@@ -357,7 +356,7 @@ export function PlayerControls() {
             value={[videoProgress * 100]}
             max={100}
             step={0.1}
-            className="flex-1"
+            className="[&_[role=slider]]:bg-primary [&_[role=slider]]:border-primary-foreground [&_.slider-track]:bg-muted [&_.slider-range]:bg-primary flex-1"
           />
           <div className="flex min-w-[120px] items-center gap-1">
             <Slider
@@ -365,7 +364,7 @@ export function PlayerControls() {
               onValueChange={handleSliderChange}
               max={100}
               step={1}
-              className="flex-1"
+              className="[&_[role=slider]]:bg-primary [&_[role=slider]]:border-primary-foreground [&_.slider-track]:bg-muted [&_.slider-range]:bg-primary flex-1"
             />
             <span className="text-muted-foreground min-w-[28px] text-xs">
               {volume[0]}%

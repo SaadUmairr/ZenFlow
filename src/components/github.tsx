@@ -16,7 +16,7 @@ export function Github() {
       <Button
         variant="ghost"
         size="icon"
-        className="border-[var (--border)] text-[var (--foreground)] hover:bg-[var (--accent)] hover:text-[var (--accent-foreground)]"
+        className="border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
       >
         <Image
           src={GitHubLogo}

@@ -16,6 +16,7 @@ import {
   PauseIcon,
   PlayIcon,
   RotateCcwIcon,
+  SkipForwardIcon,
   StopCircleIcon,
   TimerIcon,
 } from "lucide-react"
@@ -138,8 +139,22 @@ export function Stopwatch() {
           finalPauseTime += now - pauseStartTime
         }
 
-        const totalSessionDuration = now - sessionStartTime
-        const actualFocusTime = totalSessionDuration - finalPauseTime
+        let actualFocusTime = 0
+
+        if (mode === "pomodoro") {
+          actualFocusTime =
+            pomodoroStats.completedFocusSession * POMO_FOCUS_DURATION
+
+          if (pomodoroPhase === "focus" && isTimerRunning) {
+            const currentPhaseTime = POMO_FOCUS_DURATION - time
+            if (currentPhaseTime > 0) {
+              actualFocusTime += currentPhaseTime
+            }
+          }
+        } else {
+          const totalSessionDuration = now - sessionStartTime
+          actualFocusTime = Math.max(0, totalSessionDuration - finalPauseTime)
+        }
 
         const sessionData: SessionData = {
           id: sessionId,
@@ -162,10 +177,15 @@ export function Stopwatch() {
         }
 
         await saveSessionDataIDB(sessionData)
-        setSaveAllSession((prev) => [...prev, sessionData])
+        setSaveAllSession((prev) => {
+          // Remove any existing session with same ID (to prevent duplicates)
+          const filteredPrev = prev.filter((s) => s.id !== sessionId)
+          return [...filteredPrev, sessionData]
+        })
       } catch (error) {
         console.error("Error ending session:", error)
       } finally {
+        // Reset session state
         setSessionId(null)
         setSessionStartTime(null)
         setTotalPauseTime(0)
@@ -181,6 +201,11 @@ export function Stopwatch() {
       pauseStartTime,
       mode,
       pomodoroStats,
+      POMO_FOCUS_DURATION,
+      pomodoroPhase,
+      isTimerRunning,
+      time,
+      setSaveAllSession,
     ]
   )
 
@@ -214,14 +239,7 @@ export function Stopwatch() {
       } else {
         setTime(POMO_FOCUS_DURATION)
         setPomodoroPhase("focus")
-
-        setPomodoroStats({
-          completedBreaks: 0,
-          completedFocusSession: 0,
-          cycleStartTime: 0,
-          cycleEndTime: now,
-        })
-
+        setPomodoroStats((prev) => ({ ...prev, cycleEndTime: now }))
         setIsTransitionging(false)
         phaseTransitionRef.current = false
       }
@@ -242,15 +260,10 @@ export function Stopwatch() {
     try {
       if (isPaused) {
         // Resuming from pause
-
         if (pauseStartTime) {
           const pauseDuration = now - pauseStartTime
-          setTotalPauseTime((prev) => {
-            const newTotal = prev + pauseDuration
-            return newTotal
-          })
+          setTotalPauseTime((prev) => prev + pauseDuration)
         }
-
         setIsPaused(false)
         setPauseStartTime(null)
       } else {
@@ -291,6 +304,14 @@ export function Stopwatch() {
     [sessionId, mode, endCurrentSession, startNewSession]
   )
 
+  // NEW: Skip Phase Function
+  const handleSkipPhase = useCallback(() => {
+    if (mode !== "pomodoro" || !isTimerRunning || isTransitioning) return
+
+    // Force phase transition by setting time to 0
+    setTime(0)
+  }, [mode, isTimerRunning, isTransitioning])
+
   const handlePomodoroPhaseEnd = useCallback(async () => {
     if (isTransitioning || phaseTransitionRef.current) return
 
@@ -319,58 +340,9 @@ export function Stopwatch() {
         setPomodoroPhase("focus")
         setTime(POMO_FOCUS_DURATION)
       }
-      if (sessionId && sessionStartTime) {
-        const now = Date.now()
-        let finalPauseTime = totalPauseTime
-        if (isPaused && pauseStartTime) {
-          finalPauseTime += now - pauseStartTime
-        }
 
-        const totalSessionDuration = now - sessionStartTime
-        const actualFocusTime = totalSessionDuration - finalPauseTime
-
-        const updatedStats = {
-          ...pomodoroStats,
-          completedFocusSession:
-            pomodoroPhase === "focus"
-              ? pomodoroStats.completedFocusSession + 1
-              : pomodoroStats.completedFocusSession,
-          completedBreaks:
-            pomodoroPhase === "break"
-              ? pomodoroStats.completedBreaks + 1
-              : pomodoroStats.completedBreaks,
-        }
-
-        const sessionData: SessionData = {
-          id: sessionId,
-          mode: "pomodoro",
-          date: new Date(now).toISOString().split("T")[0],
-          startTime: sessionStartTime,
-          endTime: now,
-          wasCompleted: false,
-          totalPauseTime: finalPauseTime,
-          actualFocusTime: Math.max(0, actualFocusTime),
-          completedFocusSession: updatedStats.completedFocusSession,
-          completedBreaks: updatedStats.completedBreaks,
-          cycleStartTime: updatedStats.cycleStartTime,
-          cycleEndTime: 0,
-        }
-
-        // Update the session in IndexedDB
-        await saveSessionDataIDB(sessionData)
-
-        // Update the global state
-        setSaveAllSession((prev) => {
-          const index = prev.findIndex((s) => s.id === sessionId)
-          if (index >= 0) {
-            const newSessions = [...prev]
-            newSessions[index] = sessionData
-            return newSessions
-          } else {
-            return [...prev, sessionData]
-          }
-        })
-      }
+      // NOTE: Removed session saving here to prevent double counting
+      // Session will only be saved when the entire pomodoro session ends
     } catch (error) {
       console.error("Error in phase transition:", error)
     } finally {
@@ -385,13 +357,6 @@ export function Stopwatch() {
     POMO_BREAK_DURATION,
     POMO_FOCUS_DURATION,
     setPomoBreak,
-    pomodoroStats,
-    sessionId,
-    sessionStartTime,
-    totalPauseTime,
-    isPaused,
-    pauseStartTime,
-    setSaveAllSession,
   ])
 
   const handleCountdownEnd = useCallback(async () => {
@@ -473,6 +438,7 @@ export function Stopwatch() {
     handlePomodoroPhaseEnd,
     handleCountdownEnd,
   ])
+
   return (
     <>
       <div className="flex h-full w-full items-center justify-center">
@@ -498,6 +464,21 @@ export function Stopwatch() {
                   <PauseIcon className="h-4 w-4" />
                 )}
               </Button>
+
+              {/* Skip Phase Button - Only show for Pomodoro */}
+              {mode === "pomodoro" && (
+                <Button
+                  onClick={handleSkipPhase}
+                  variant="outline"
+                  size="sm"
+                  disabled={isTransitioning}
+                  className="h-10 w-10"
+                  title={`Skip ${pomodoroPhase === "focus" ? "Focus" : "Break"}`}
+                >
+                  <SkipForwardIcon className="h-4 w-4" />
+                </Button>
+              )}
+
               <Button
                 onClick={handleStop}
                 variant={isTimerRunning ? "destructive" : "outline"}
@@ -604,6 +585,21 @@ export function Stopwatch() {
                   </>
                 )}
               </Button>
+
+              {/* Skip Phase Button - Only show for Pomodoro */}
+              {mode === "pomodoro" && (
+                <Button
+                  onClick={handleSkipPhase}
+                  variant="outline"
+                  size="lg"
+                  disabled={isTransitioning}
+                  className="flex items-center gap-2"
+                >
+                  <SkipForwardIcon className="h-4 w-4" />
+                  Skip
+                </Button>
+              )}
+
               <Button
                 onClick={handleStop}
                 variant="destructive"
