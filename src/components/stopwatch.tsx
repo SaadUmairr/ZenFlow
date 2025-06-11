@@ -37,6 +37,7 @@ type PomodoroPhase = "focus" | "break"
 export interface PomodoroStats {
   completedFocusSession: number
   completedBreaks: number
+  pomoFocusTime: number
   cycleStartTime: number
   cycleEndTime: number
 }
@@ -61,6 +62,14 @@ const COUNTDOWN_OPTIONS = [
 ]
 
 export function Stopwatch() {
+  // Global states
+  const setPomoBreak = useSetAtom(isPomodoroBreakAtom)
+  const setSaveAllSession = useSetAtom(allSessionSavedDataAtom)
+  const pomodoroDuration = useAtomValue(PomodoroDurationsAtom)
+
+  const POMO_FOCUS_DURATION = pomodoroDuration.focus
+  const POMO_BREAK_DURATION = pomodoroDuration.break
+
   // STATES
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false)
   const [time, setTime] = useAtom(timerAtom)
@@ -78,6 +87,7 @@ export function Stopwatch() {
   const [pomodoroStats, setPomodoroStats] = useState<PomodoroStats>({
     completedFocusSession: 0,
     completedBreaks: 0,
+    pomoFocusTime: pomodoroDuration.focus,
     cycleStartTime: 0,
     cycleEndTime: 0,
   })
@@ -85,14 +95,6 @@ export function Stopwatch() {
   // Refs
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const phaseTransitionRef = useRef<boolean>(false)
-
-  // Global states
-  const setPomoBreak = useSetAtom(isPomodoroBreakAtom)
-  const setSaveAllSession = useSetAtom(allSessionSavedDataAtom)
-  const pomodoroDuration = useAtomValue(PomodoroDurationsAtom)
-
-  const POMO_FOCUS_DURATION = pomodoroDuration.focus
-  const POMO_BREAK_DURATION = pomodoroDuration.break
 
   // Functions
 
@@ -117,6 +119,7 @@ export function Stopwatch() {
         setPomodoroStats({
           completedFocusSession: 0,
           completedBreaks: 0,
+          pomoFocusTime: pomodoroDuration.focus,
           cycleStartTime: now,
           cycleEndTime: 0,
         })
@@ -132,29 +135,14 @@ export function Stopwatch() {
 
       try {
         const now = Date.now()
-
-        // Calculate final pause time if currently paused
         let finalPauseTime = totalPauseTime
-        if (isPaused && pauseStartTime) {
-          finalPauseTime += now - pauseStartTime
-        }
+
+        if (isPaused && pauseStartTime) finalPauseTime += now - pauseStartTime
 
         let actualFocusTime = 0
+        const totalSessionDuration = now - sessionStartTime
 
-        if (mode === "pomodoro") {
-          actualFocusTime =
-            pomodoroStats.completedFocusSession * POMO_FOCUS_DURATION
-
-          if (pomodoroPhase === "focus" && isTimerRunning) {
-            const currentPhaseTime = POMO_FOCUS_DURATION - time
-            if (currentPhaseTime > 0) {
-              actualFocusTime += currentPhaseTime
-            }
-          }
-        } else {
-          const totalSessionDuration = now - sessionStartTime
-          actualFocusTime = Math.max(0, totalSessionDuration - finalPauseTime)
-        }
+        actualFocusTime = Math.max(0, totalSessionDuration - finalPauseTime)
 
         const sessionData: SessionData = {
           id: sessionId,
@@ -167,21 +155,22 @@ export function Stopwatch() {
           actualFocusTime: Math.max(0, actualFocusTime),
         }
 
-        // Add Pomodoro stats if in Pomodoro mode
         if (mode === "pomodoro") {
           sessionData.completedFocusSession =
             pomodoroStats.completedFocusSession
           sessionData.completedBreaks = pomodoroStats.completedBreaks
           sessionData.cycleStartTime = pomodoroStats.cycleStartTime
-          sessionData.cycleEndTime = now
+          sessionData.cycleEndTime = pomodoroStats.cycleEndTime
         }
 
         await saveSessionDataIDB(sessionData)
+
         setSaveAllSession((prev) => {
-          // Remove any existing session with same ID (to prevent duplicates)
           const filteredPrev = prev.filter((s) => s.id !== sessionId)
           return [...filteredPrev, sessionData]
         })
+
+        console.log("SAVING: ", sessionData)
       } catch (error) {
         console.error("Error ending session:", error)
       } finally {
@@ -208,6 +197,91 @@ export function Stopwatch() {
       setSaveAllSession,
     ]
   )
+
+  // const endCurrentSession = useCallback(
+  //   async (wasCompleted: boolean = false) => {
+  //     if (!sessionId || !sessionStartTime) return
+
+  //     try {
+  //       const now = Date.now()
+
+  //       // Calculate final pause time if currently paused
+  //       let finalPauseTime = totalPauseTime
+  //       if (isPaused && pauseStartTime) {
+  //         finalPauseTime += now - pauseStartTime
+  //       }
+
+  //       let actualFocusTime = 0
+
+  //       if (mode === "pomodoro") {
+  //         actualFocusTime =
+  //           pomodoroStats.completedFocusSession * POMO_FOCUS_DURATION
+
+  //         if (pomodoroPhase === "focus" && isTimerRunning) {
+  //           const currentPhaseTime = POMO_FOCUS_DURATION - time
+  //           if (currentPhaseTime > 0) {
+  //             actualFocusTime += currentPhaseTime
+  //           }
+  //         }
+  //       } else {
+  //         const totalSessionDuration = now - sessionStartTime
+  //         actualFocusTime = Math.max(0, totalSessionDuration - finalPauseTime)
+  //       }
+
+  //       const sessionData: SessionData = {
+  //         id: sessionId,
+  //         mode,
+  //         date: new Date(now).toISOString().split("T")[0],
+  //         startTime: sessionStartTime,
+  //         endTime: now,
+  //         wasCompleted,
+  //         totalPauseTime: finalPauseTime,
+  //         actualFocusTime: Math.max(0, actualFocusTime),
+  //       }
+
+  //       // Add Pomodoro stats if in Pomodoro mode
+  //       if (mode === "pomodoro") {
+  //         sessionData.completedFocusSession =
+  //           pomodoroStats.completedFocusSession
+  //         sessionData.completedBreaks = pomodoroStats.completedBreaks
+  //         sessionData.cycleStartTime = pomodoroStats.cycleStartTime
+  //         sessionData.cycleEndTime = now
+  //       }
+
+  //       await saveSessionDataIDB(sessionData)
+  //       setSaveAllSession((prev) => {
+  //         // Remove any existing session with same ID (to prevent duplicates)
+  //         const filteredPrev = prev.filter((s) => s.id !== sessionId)
+  //         return [...filteredPrev, sessionData]
+  //       })
+
+  //       console.log("SAVING SESSION: ", sessionData)
+  //     } catch (error) {
+  //       console.error("Error ending session:", error)
+  //     } finally {
+  //       // Reset session state
+  //       setSessionId(null)
+  //       setSessionStartTime(null)
+  //       setTotalPauseTime(0)
+  //       setPauseStartTime(null)
+  //       setIsPaused(false)
+  //     }
+  //   },
+  //   [
+  //     sessionId,
+  //     sessionStartTime,
+  //     totalPauseTime,
+  //     isPaused,
+  //     pauseStartTime,
+  //     mode,
+  //     pomodoroStats,
+  //     POMO_FOCUS_DURATION,
+  //     pomodoroPhase,
+  //     isTimerRunning,
+  //     time,
+  //     setSaveAllSession,
+  //   ]
+  // )
 
   const startStopwatch = useCallback(async () => {
     try {

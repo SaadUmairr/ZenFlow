@@ -93,23 +93,18 @@ export function Stats() {
     ).getTime()
 
     for (const session of sessionGlobal) {
+      console.log("ITERATING: ", session)
       const start = new Date(session.startTime)
       const duration = session.actualFocusTime
       longest = Math.max(longest, duration)
 
+      totalFocus += duration
+
       // count stopwatch/countdown
       if (session.mode === "stopwatch" || session.mode === "countdown") {
         swSessions++
-        totalFocus += duration
       } else if (session.mode === "pomodoro") {
         pomoSessions++
-        if (!session.completedFocusSession || !session.completedBreaks) {
-          continue
-        }
-        compPomo += session.completedFocusSession
-        compBreaks += session.completedBreaks
-        totalFocus += session.completedFocusSession * pomodoroDurations.focus
-        totalBreak += session.completedBreaks * pomodoroDurations.break
       }
 
       // today’s stats
