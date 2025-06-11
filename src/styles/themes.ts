@@ -1,5 +1,4 @@
 export const themes = [
-  "default",
   "light",
   "dark",
   "dracula",
