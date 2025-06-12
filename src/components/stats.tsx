@@ -1,11 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import {
-  allSessionSavedDataAtom,
-  dailyGoalAtom,
-  PomodoroDurationsAtom,
-} from "@/context/data"
+import { allSessionSavedDataAtom, dailyGoalAtom } from "@/context/data"
 import { useAtomValue } from "jotai"
 import {
   BarChart3Icon,
@@ -58,7 +54,6 @@ export function Stats() {
   // Gloabl states
   const dailyFocusGoal = useAtomValue(dailyGoalAtom)
   const sessionGlobal = useAtomValue(allSessionSavedDataAtom)
-  const pomodoroDurations = useAtomValue(PomodoroDurationsAtom)
 
   useEffect(() => {
     try {
@@ -75,11 +70,11 @@ export function Stats() {
   }, [sessionGlobal])
 
   const calculateSession = (): UserStats => {
-    let totalFocus = 0,
-      totalBreak = 0
+    let totalFocus = 0
+    const totalBreak = 0
     let swSessions = 0,
       pomoSessions = 0
-    let compPomo = 0,
+    const compPomo = 0,
       compBreaks = 0
     let longest = 0,
       todayCount = 0,

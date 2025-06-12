@@ -128,7 +128,10 @@ export function AudioManager() {
     <div>
       <Drawer>
         <DrawerTrigger asChild>
-          <Button variant="ghost" size="icon">
+          <Button
+            variant={activeSounds.size > 0 ? "default" : "ghost"}
+            size="icon"
+          >
             <AudioLines className="h-4 w-4" />
           </Button>
         </DrawerTrigger>
@@ -172,7 +175,7 @@ export function AudioManager() {
                 <div className="text-muted-foreground flex items-center gap-2 text-sm">
                   <Play className="h-4 w-4" />
                   <span>
-                    Playing:{" "}
+                    Playing: &nbsp;
                     {Array.from(activeSounds)
                       .map((id) => SOUND_SCENES.find((s) => s.id === id)?.name)
                       .filter(Boolean)

@@ -11,9 +11,9 @@ import {
   LeafIcon,
   MusicIcon,
   PlaneIcon,
+  RadioReceiverIcon,
   RectangleGogglesIcon,
   TreesIcon,
-  Volume2Icon,
   WavesIcon,
   WindIcon,
   ZapIcon,
@@ -115,7 +115,7 @@ export const SOUND_SCENES: SoundScene[] = [
   {
     id: "whitenoise",
     name: "White Noise",
-    icon: Volume2Icon,
+    icon: RadioReceiverIcon,
     color: "from-purple-500/20 to-pink-500/20",
     activeColor: "from-purple-500/40 to-pink-500/40",
     iconColor: "text-purple-600",
@@ -124,7 +124,7 @@ export const SOUND_SCENES: SoundScene[] = [
   {
     id: "brownNoise",
     name: "Brown Noise",
-    icon: Volume2Icon,
+    icon: RadioReceiverIcon,
     color: "from-orange-800/20 to-orange-900/20",
     activeColor: "from-orange-800/40 to-orange-900/40",
 
@@ -134,7 +134,7 @@ export const SOUND_SCENES: SoundScene[] = [
   {
     id: "pinkNoise",
     name: "Pink Noise",
-    icon: Volume2Icon,
+    icon: RadioReceiverIcon,
     color: "from-pink-800/20 to-pink-900/20",
     activeColor: "from-pink-800/40 to-pink-900/40",
     iconColor: "text-slate-300",
