@@ -88,7 +88,6 @@ export function Stats() {
     ).getTime()
 
     for (const session of sessionGlobal) {
-      console.log("ITERATING: ", session)
       const start = new Date(session.startTime)
       const duration = session.actualFocusTime
       longest = Math.max(longest, duration)
