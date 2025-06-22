@@ -9,7 +9,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <JotaiProvider>
-      <ThemeProvider attribute="data-theme" defaultTheme="light">
+      <ThemeProvider attribute="data-theme" defaultTheme="dark">
         <JotaiInitializer />
         {children}
       </ThemeProvider>

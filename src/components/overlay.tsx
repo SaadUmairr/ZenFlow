@@ -103,7 +103,7 @@ export function UserSettingNavButton() {
           <SettingsIcon className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent className="font-[family-name:var(--font-geist-sans)]">
         {/* <DropdownMenuLabel>Settings</DropdownMenuLabel> */}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => storeClearHandler("session")}>
@@ -179,7 +179,7 @@ function VideoItemComponent({
         duration: 0.2,
         delay: index * 0.03,
       }}
-      className="group mb-3"
+      className="group mb-3 font-[family-name:var(--font-geist-sans)]"
     >
       <div
         className={`flex items-center rounded-lg border p-3 transition-all duration-200 ${
@@ -279,7 +279,7 @@ export function AddVideoDialog() {
           Add Video
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="font-[family-name:var(--font-geist-sans)] sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Add New Video</DialogTitle>
           <DialogDescription>
@@ -376,7 +376,7 @@ export function AllVideoPanel() {
           </Button>
         </SheetTrigger>
 
-        <SheetContent className="flex h-full w-full flex-col overflow-y-auto bg-[var(--popover)] px-0 py-0 text-[var(--popover-foreground)] sm:max-w-lg">
+        <SheetContent className="flex h-full w-full flex-col overflow-y-auto bg-[var(--popover)] px-0 py-0 font-[family-name:var(--font-geist-sans)] text-[var(--popover-foreground)] sm:max-w-lg">
           <div className="flex h-full flex-col">
             {/* Header */}
             <div className="border-b border-[var(--border)] px-6 py-4">
@@ -512,7 +512,7 @@ export function AllVideoPanel() {
 
       {/* Remove All Dialog */}
       <Dialog open={removeAllDialog} onOpenChange={setRemoveAllDialog}>
-        <DialogContent className="border-[var(--border)] bg-[var(--popover)] text-[var(--popover-foreground)] sm:max-w-md">
+        <DialogContent className="border-[var(--border)] bg-[var(--popover)] font-[family-name:var(--font-geist-sans)] text-[var(--popover-foreground)] sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-[var(--destructive)]">
               <Trash2Icon className="h-5 w-5" />
@@ -567,7 +567,7 @@ export function DailyGoalDrawerTrigger({ name = false }: { name?: boolean }) {
           <SquarePenIcon /> {name ? "Daily Goal" : ""}
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="min-h-1/4">
+      <DrawerContent className="min-h-1/4 font-[family-name:var(--font-geist-sans)]">
         <DrawerHeader>
           <DrawerTitle>Move Goal</DrawerTitle>
           <DrawerDescription>Set your daily focus goal</DrawerDescription>
@@ -655,7 +655,7 @@ export function PomoBreakOverlay() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 font-[family-name:var(--font-geist-sans)] backdrop-blur-sm"
         >
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}

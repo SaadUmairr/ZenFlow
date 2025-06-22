@@ -15,7 +15,7 @@ import "@/styles/themes.css"
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-[var(--background)] font-[family-name:var(--font-geist-sans)]">
       <PomoBreakOverlay />
       <div className="flex h-screen flex-col overflow-hidden lg:overflow-hidden">
         {/* Navbar */}
