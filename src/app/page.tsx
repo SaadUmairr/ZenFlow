@@ -1,5 +1,9 @@
 import { AudioManager } from "@/components/beats"
-import { PomoBreakOverlay, UserSettingNavButton } from "@/components/overlay"
+import {
+  AbsoluteFocus,
+  PomoBreakOverlay,
+  UserSettingNavButton,
+} from "@/components/overlay"
 import { Player } from "@/components/player"
 import { Stats } from "@/components/stats"
 import { Stopwatch } from "@/components/stopwatch"
@@ -22,6 +26,7 @@ export default function Home() {
           </h1>
           <div className="ml-auto flex items-center gap-x-4">
             {/* <Github /> */}
+            <AbsoluteFocus />
             <AudioManager />
             <UserSettingNavButton />
             <ThemeDropdown />

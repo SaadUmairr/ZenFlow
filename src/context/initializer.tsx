@@ -40,7 +40,7 @@ export function JotaiInitializer() {
       const sessionsData = await getSavedSessionDataIDB()
       if (sessionsData.length > 0) setAllSessions(sessionsData)
     })()
-  }, [])
+  }, [setAllSessions, setDailyGoal, setVideoList])
 
   return null
 }

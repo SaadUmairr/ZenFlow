@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { JSX, useCallback, useEffect, useRef, useState } from "react"
 import {
   AllVideosListAtom,
   CurrentlyPlayingMediaAtom,
@@ -29,6 +29,7 @@ import {
   PlusIcon,
   SettingsIcon,
   SquarePenIcon,
+  TargetIcon,
   Trash2Icon,
   VideoIcon,
   XIcon,
@@ -747,5 +748,215 @@ export function PomoBreakOverlay() {
         </motion.div>
       )}
     </AnimatePresence>
+  )
+}
+function formatCurrentTime() {
+  const now = new Date()
+  const hours = now.getHours()
+  const minutes = now.getMinutes()
+
+  const hour12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours
+  const ampm = hours >= 12 ? "PM" : "AM"
+
+  return {
+    time: `${hour12.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`,
+    period: ampm,
+  }
+}
+
+// Constants for animations - same as original but organized
+const EASING = [0.25, 0.46, 0.45, 0.94] as const
+
+// Constants for better maintainability
+const CLOCK_UPDATE_INTERVAL = 60000 // 60 seconds
+const FULLSCREEN_ERROR_PREFIX = "Failed to"
+
+interface TimeDisplay {
+  time: string
+  period: string | null
+}
+
+export function AbsoluteFocus(): JSX.Element {
+  const [isFocusMode, setIsFocusMode] = useState(false)
+  const [currentTime, setCurrentTime] = useState("")
+  const [currentPeriod, setCurrentPeriod] = useState("")
+
+  // Atom values
+  const timeValue = useAtomValue(timerAtom)
+  const isPomoBreak = useAtomValue(isPomodoroBreakAtom)
+
+  // Refs
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Memoized time formatting function
+  const formatDuration = useCallback((ms: number): string => {
+    return formatTimeMain(ms)
+  }, [])
+
+  // Cleanup interval helper
+  const clearTimeInterval = useCallback((): void => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+  }, [])
+
+  // Update current time helper
+  const updateCurrentTime = useCallback((): void => {
+    const timeObj = formatCurrentTime()
+    setCurrentTime(timeObj.time)
+    setCurrentPeriod(timeObj.period)
+  }, [])
+
+  // Fullscreen management
+  const handleFullscreenToggle = useCallback(
+    async (enterFullscreen: boolean): Promise<void> => {
+      try {
+        if (enterFullscreen) {
+          const elem = document.documentElement
+          if (elem.requestFullscreen) {
+            await elem.requestFullscreen()
+          }
+        } else {
+          if (document.fullscreenElement && document.exitFullscreen) {
+            await document.exitFullscreen()
+          }
+        }
+      } catch (error) {
+        const action = enterFullscreen ? "enter" : "exit"
+        console.error(
+          `${FULLSCREEN_ERROR_PREFIX} ${action} fullscreen mode:`,
+          error
+        )
+      }
+    },
+    []
+  )
+
+  // Focus mode toggle handler
+  const toggleFocusMode = useCallback(async (): Promise<void> => {
+    const newFocusMode = !isFocusMode
+
+    // Handle fullscreen first
+    await handleFullscreenToggle(newFocusMode)
+
+    // Then toggle focus mode
+    setIsFocusMode(newFocusMode)
+  }, [isFocusMode, handleFullscreenToggle])
+
+  // Time update effect
+  useEffect(() => {
+    // If timer is active, clear any existing interval
+    if (timeValue) {
+      clearTimeInterval()
+      return
+    }
+
+    // Update time immediately
+    updateCurrentTime()
+
+    // Set up interval for regular updates
+    intervalRef.current = setInterval(updateCurrentTime, CLOCK_UPDATE_INTERVAL)
+
+    // Cleanup function
+    return clearTimeInterval
+  }, [timeValue, clearTimeInterval, updateCurrentTime])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return clearTimeInterval
+  }, [clearTimeInterval])
+
+  // Memoized display values
+  const displayValues: TimeDisplay = {
+    time: timeValue ? formatDuration(timeValue) : currentTime,
+    period: timeValue ? null : currentPeriod,
+  }
+
+  // Early return if in break mode
+  const shouldShowFocusMode = isFocusMode && !isPomoBreak
+
+  return (
+    <>
+      {/* Focus Mode Toggle Button */}
+      <div className="relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleFocusMode}
+          className={`transition-colors ${
+            isFocusMode ? "bg-primary text-primary-foreground" : ""
+          }`}
+          aria-label={isFocusMode ? "Exit focus mode" : "Enter focus mode"}
+        >
+          <TargetIcon className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Focus Mode Overlay */}
+      <AnimatePresence mode="wait">
+        {shouldShowFocusMode && (
+          <motion.div
+            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            animate={{
+              opacity: 1,
+              backdropFilter: "blur(20px)",
+            }}
+            exit={{
+              opacity: 0,
+              backdropFilter: "blur(0px)",
+            }}
+            transition={{
+              duration: 0.5,
+              ease: EASING,
+            }}
+            className="bg-background/60 fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
+            onClick={toggleFocusMode}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Focus mode display"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 20 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.1,
+                ease: EASING,
+              }}
+              className="text-center"
+            >
+              <div className="w-full px-4 sm:px-8 md:px-12 lg:px-16">
+                <div className="flex items-baseline justify-center gap-2 sm:gap-4">
+                  {/* Main Time Display with Simple Tailwind Outline */}
+                  <h1 className="font-mono text-[clamp(7rem,20vw,25rem)] leading-none font-bold tracking-tight text-[var(--accent)] [text-shadow:1px_1px_0_var(--primary),-1px_-1px_0_var(--primary),1px_-1px_0_var(--primary),-1px_1px_0_var(--primary)]">
+                    {displayValues.time}
+                  </h1>
+
+                  {/* Period Display with Simple Tailwind Outline */}
+                  {displayValues.period && (
+                    <span className="font-mono text-[9vw] font-medium text-[var(--accent)] opacity-80 [text-shadow:1px_1px_0_var(--primary),-1px_-1px_0_var(--primary),1px_-1px_0_var(--primary),-1px_1px_0_var(--primary)] sm:text-[8vw] md:text-[7vw] lg:text-[6vw] xl:text-[5vw] 2xl:text-[4vw]">
+                      {displayValues.period}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Exit Hint */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, delay: 0.3 }}
+                className="text-muted-foreground mt-4 text-sm italic sm:text-base"
+              >
+                Tap anywhere to exit focus mode
+              </motion.p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   )
 }
