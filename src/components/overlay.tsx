@@ -35,10 +35,11 @@ import {
   XIcon,
 } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
+import { createPortal } from "react-dom"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { formatTimeMain } from "@/lib/utils"
+import { cn, formatTimeMain } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -83,7 +84,13 @@ import {
 const ONE_HOUR = 60 * 60 * 1000
 const MAX_FOCUS_TIME = 12 * ONE_HOUR
 
-export function UserSettingNavButton() {
+export function UserSettingNavButton({
+  className,
+  label,
+}: {
+  className?: string
+  label?: string
+}) {
   const storeClearHandler = async (name: IDB_STORES) => {
     try {
       await clearStoreByName(name)
@@ -99,8 +106,9 @@ export function UserSettingNavButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" className={cn(className)}>
           <SettingsIcon className="h-4 w-4" />
+          <p className="text-muted-foreground">{label}</p>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="font-[family-name:var(--font-geist-sans)]">
@@ -750,6 +758,7 @@ export function PomoBreakOverlay() {
     </AnimatePresence>
   )
 }
+
 function formatCurrentTime() {
   const now = new Date()
   const hours = now.getHours()
@@ -764,10 +773,8 @@ function formatCurrentTime() {
   }
 }
 
-// Constants for animations - same as original but organized
 const EASING = [0.25, 0.46, 0.45, 0.94] as const
 
-// Constants for better maintainability
 const CLOCK_UPDATE_INTERVAL = 60000 // 60 seconds
 const FULLSCREEN_ERROR_PREFIX = "Failed to"
 
@@ -776,10 +783,17 @@ interface TimeDisplay {
   period: string | null
 }
 
-export function AbsoluteFocus(): JSX.Element {
+export function AbsoluteFocus({
+  className,
+  label,
+}: {
+  className?: string
+  label?: string
+}): JSX.Element {
   const [isFocusMode, setIsFocusMode] = useState(false)
   const [currentTime, setCurrentTime] = useState("")
   const [currentPeriod, setCurrentPeriod] = useState("")
+  const [mounted, setMounted] = useState(false)
 
   // Atom values
   const timeValue = useAtomValue(timerAtom)
@@ -787,6 +801,12 @@ export function AbsoluteFocus(): JSX.Element {
 
   // Refs
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Handle mounting for portal
+  useEffect(() => {
+    setMounted(true)
+    return () => setMounted(false)
+  }, [])
 
   // Memoized time formatting function
   const formatDuration = useCallback((ms: number): string => {
@@ -858,11 +878,9 @@ export function AbsoluteFocus(): JSX.Element {
     // Set up interval for regular updates
     intervalRef.current = setInterval(updateCurrentTime, CLOCK_UPDATE_INTERVAL)
 
-    // Cleanup function
     return clearTimeInterval
   }, [timeValue, clearTimeInterval, updateCurrentTime])
 
-  // Cleanup on unmount
   useEffect(() => {
     return clearTimeInterval
   }, [clearTimeInterval])
@@ -876,46 +894,42 @@ export function AbsoluteFocus(): JSX.Element {
   // Early return if in break mode
   const shouldShowFocusMode = isFocusMode && !isPomoBreak
 
-  return (
-    <>
-      {/* Focus Mode Toggle Button */}
-      <div className="relative">
-        <Button
-          variant="ghost"
-          size="icon"
+  // Portal overlay component
+  const FocusOverlay = () => (
+    <AnimatePresence mode="wait">
+      {shouldShowFocusMode && (
+        <motion.div
+          initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+          animate={{
+            opacity: 1,
+            backdropFilter: "blur(20px)",
+          }}
+          exit={{
+            opacity: 0,
+            backdropFilter: "blur(0px)",
+          }}
+          transition={{
+            duration: 0.5,
+            ease: EASING,
+          }}
+          className="bg-background/60 fixed inset-0 backdrop-blur-sm"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: "100vw",
+            height: "100vh",
+            zIndex: 9999,
+            isolation: "isolate",
+          }}
           onClick={toggleFocusMode}
-          className={`transition-colors ${
-            isFocusMode ? "bg-primary text-primary-foreground" : ""
-          }`}
-          aria-label={isFocusMode ? "Exit focus mode" : "Enter focus mode"}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Focus mode display"
         >
-          <TargetIcon className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Focus Mode Overlay */}
-      <AnimatePresence mode="wait">
-        {shouldShowFocusMode && (
-          <motion.div
-            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-            animate={{
-              opacity: 1,
-              backdropFilter: "blur(20px)",
-            }}
-            exit={{
-              opacity: 0,
-              backdropFilter: "blur(0px)",
-            }}
-            transition={{
-              duration: 0.5,
-              ease: EASING,
-            }}
-            className="bg-background/60 fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
-            onClick={toggleFocusMode}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Focus mode display"
-          >
+          <div className="flex min-h-screen w-full items-center justify-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.8, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -926,6 +940,7 @@ export function AbsoluteFocus(): JSX.Element {
                 ease: EASING,
               }}
               className="text-center"
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="w-full px-4 sm:px-8 md:px-12 lg:px-16">
                 <div className="flex items-baseline justify-center gap-2 sm:gap-4">
@@ -954,9 +969,35 @@ export function AbsoluteFocus(): JSX.Element {
                 Tap anywhere to exit focus mode
               </motion.p>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+
+  return (
+    <>
+      <div className="relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleFocusMode}
+          className={cn(
+            "transition-colors duration-300",
+            isFocusMode ? "bg-primary-foreground" : "",
+            className
+          )}
+          aria-label={isFocusMode ? "Exit focus mode" : "Enter focus mode"}
+        >
+          <TargetIcon className="h-4 w-4" />
+          <p className="text-muted-foreground">{label}</p>
+        </Button>
+      </div>
+
+      {/* Portal the overlay to document.body */}
+      {mounted &&
+        typeof document !== "undefined" &&
+        createPortal(<FocusOverlay />, document.body)}
     </>
   )
 }

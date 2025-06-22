@@ -1,3 +1,12 @@
+import { Button } from "@/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
 import { AudioManager } from "@/components/beats"
 import {
   AbsoluteFocus,
@@ -13,6 +22,8 @@ import { ZenFlowLogo } from "@/components/zen"
 
 import "@/styles/themes.css"
 
+import { MenuIcon } from "lucide-react"
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-[var(--background)] font-[family-name:var(--font-geist-sans)]">
@@ -24,12 +35,46 @@ export default function Home() {
           <h1 className="grow text-xl font-semibold text-[var(--card-foreground)]">
             ZEN FLOW
           </h1>
-          <div className="ml-auto flex items-center gap-x-4">
+          <div className="ml-auto hidden items-center gap-x-4 lg:flex">
             {/* <Github /> */}
             <AbsoluteFocus />
             <AudioManager />
             <UserSettingNavButton />
             <ThemeDropdown />
+          </div>
+          {/* Mobile Navbar */}
+          <div className="flex lg:hidden">
+            <Drawer>
+              <DrawerTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MenuIcon />
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent className="min-h-1/3">
+                <DrawerHeader>
+                  <DrawerTitle>Menu</DrawerTitle>
+                  <DrawerDescription></DrawerDescription>
+                </DrawerHeader>
+                <div className="mb-4 grid grid-cols-2 gap-4 px-4">
+                  <AbsoluteFocus
+                    className="flex h-24 w-full flex-col items-center justify-center rounded-[var(--radius)] border-2 border-dashed border-[var(--border)]"
+                    label="Absolute Focus"
+                  />
+                  <AudioManager
+                    className="flex h-24 w-full flex-col items-center justify-center rounded-[var(--radius)] border-2 border-dashed border-[var(--border)]"
+                    label="Ambient Sounds"
+                  />
+                  <UserSettingNavButton
+                    className="flex h-24 w-full flex-col items-center justify-center rounded-[var(--radius)] border-2 border-dashed border-[var(--border)]"
+                    label="Settings"
+                  />
+                  <ThemeDropdown
+                    className="flex h-24 w-full flex-col items-center justify-center rounded-[var(--radius)] border-2 border-dashed border-[var(--border)]"
+                    label="Themes"
+                  />
+                </div>
+              </DrawerContent>
+            </Drawer>
           </div>
         </nav>
 

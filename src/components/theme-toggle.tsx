@@ -4,6 +4,7 @@
 import { Check, PaletteIcon } from "lucide-react"
 import { useTheme } from "next-themes"
 
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -13,13 +14,20 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { themes } from "@/styles/themes"
 
-export function ThemeDropdown() {
+export function ThemeDropdown({
+  className,
+  label,
+}: {
+  className?: string
+  label?: string
+}) {
   const { setTheme, theme } = useTheme()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" className={cn(className)}>
           <PaletteIcon absoluteStrokeWidth />
+          <p className="text-muted-foreground">{label}</p>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
