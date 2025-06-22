@@ -7,6 +7,7 @@ import {
   dailyGoalAtom,
   isMediaPlayingAtom,
   isPomodoroBreakAtom,
+  showAbsoluteFocusAtom,
   timerAtom,
 } from "@/context/data"
 import { BREAK_ACTIVITIES, BREAK_QUOTES } from "@/data/lofi"
@@ -23,6 +24,7 @@ import { useAtom, useAtomValue } from "jotai"
 import {
   Coffee,
   ListMusicIcon,
+  MenuIcon,
   MinusIcon,
   PauseIcon,
   PlayCircleIcon,
@@ -35,7 +37,6 @@ import {
   XIcon,
 } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
-import { createPortal } from "react-dom"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -68,6 +69,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
+import { AudioManager } from "./beats"
+import { ThemeDropdown } from "./theme-toggle"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
@@ -783,52 +786,14 @@ interface TimeDisplay {
   period: string | null
 }
 
-export function AbsoluteFocus({
+export function AbsoluteFocusButton({
   className,
   label,
 }: {
   className?: string
   label?: string
-}): JSX.Element {
-  const [isFocusMode, setIsFocusMode] = useState(false)
-  const [currentTime, setCurrentTime] = useState("")
-  const [currentPeriod, setCurrentPeriod] = useState("")
-  const [mounted, setMounted] = useState(false)
-
-  // Atom values
-  const timeValue = useAtomValue(timerAtom)
-  const isPomoBreak = useAtomValue(isPomodoroBreakAtom)
-
-  // Refs
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Handle mounting for portal
-  useEffect(() => {
-    setMounted(true)
-    return () => setMounted(false)
-  }, [])
-
-  // Memoized time formatting function
-  const formatDuration = useCallback((ms: number): string => {
-    return formatTimeMain(ms)
-  }, [])
-
-  // Cleanup interval helper
-  const clearTimeInterval = useCallback((): void => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
-    }
-  }, [])
-
-  // Update current time helper
-  const updateCurrentTime = useCallback((): void => {
-    const timeObj = formatCurrentTime()
-    setCurrentTime(timeObj.time)
-    setCurrentPeriod(timeObj.period)
-  }, [])
-
-  // Fullscreen management
+}) {
+  const [isFocusMode, setIsFocusMode] = useAtom(showAbsoluteFocusAtom)
   const handleFullscreenToggle = useCallback(
     async (enterFullscreen: boolean): Promise<void> => {
       try {
@@ -853,16 +818,60 @@ export function AbsoluteFocus({
     []
   )
 
-  // Focus mode toggle handler
   const toggleFocusMode = useCallback(async (): Promise<void> => {
     const newFocusMode = !isFocusMode
-
-    // Handle fullscreen first
     await handleFullscreenToggle(newFocusMode)
-
-    // Then toggle focus mode
     setIsFocusMode(newFocusMode)
   }, [isFocusMode, handleFullscreenToggle])
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggleFocusMode}
+      className={cn(
+        "transition-colors",
+        isFocusMode ? "text-primary-foreground" : "",
+        className
+      )}
+      aria-label={isFocusMode ? "Exit focus mode" : "Enter focus mode"}
+    >
+      <TargetIcon className="h-4 w-4" />
+      <p className="text-muted-foreground">{label}</p>
+    </Button>
+  )
+}
+
+export function AbsoluteFocusOverlay(): JSX.Element {
+  const [currentTime, setCurrentTime] = useState("")
+  const [currentPeriod, setCurrentPeriod] = useState("")
+
+  // Atom values
+  const timeValue = useAtomValue(timerAtom)
+  const isPomoBreak = useAtomValue(isPomodoroBreakAtom)
+  const [isFocusMode, setIsFocusMode] = useAtom(showAbsoluteFocusAtom)
+
+  // Refs
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  const formatDuration = useCallback((ms: number): string => {
+    return formatTimeMain(ms)
+  }, [])
+
+  const clearTimeInterval = useCallback((): void => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+  }, [])
+
+  const updateCurrentTime = useCallback((): void => {
+    const timeObj = formatCurrentTime()
+    setCurrentTime(timeObj.time)
+    setCurrentPeriod(timeObj.period)
+  }, [])
+
+  const toggleFocusMode = () => setIsFocusMode((prev) => !prev)
 
   // Time update effect
   useEffect(() => {
@@ -894,42 +903,30 @@ export function AbsoluteFocus({
   // Early return if in break mode
   const shouldShowFocusMode = isFocusMode && !isPomoBreak
 
-  // Portal overlay component
-  const FocusOverlay = () => (
-    <AnimatePresence mode="wait">
-      {shouldShowFocusMode && (
-        <motion.div
-          initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-          animate={{
-            opacity: 1,
-            backdropFilter: "blur(20px)",
-          }}
-          exit={{
-            opacity: 0,
-            backdropFilter: "blur(0px)",
-          }}
-          transition={{
-            duration: 0.5,
-            ease: EASING,
-          }}
-          className="bg-background/60 fixed inset-0 backdrop-blur-sm"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            width: "100vw",
-            height: "100vh",
-            zIndex: 9999,
-            isolation: "isolate",
-          }}
-          onClick={toggleFocusMode}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Focus mode display"
-        >
-          <div className="flex min-h-screen w-full items-center justify-center">
+  return (
+    <>
+      <AnimatePresence mode="wait">
+        {shouldShowFocusMode && (
+          <motion.div
+            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            animate={{
+              opacity: 1,
+              backdropFilter: "blur(20px)",
+            }}
+            exit={{
+              opacity: 0,
+              backdropFilter: "blur(0px)",
+            }}
+            transition={{
+              duration: 0.5,
+              ease: EASING,
+            }}
+            className="bg-background/60 fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
+            onClick={toggleFocusMode}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Focus mode display"
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.8, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -940,7 +937,6 @@ export function AbsoluteFocus({
                 ease: EASING,
               }}
               className="text-center"
-              onClick={(e) => e.stopPropagation()}
             >
               <div className="w-full px-4 sm:px-8 md:px-12 lg:px-16">
                 <div className="flex items-baseline justify-center gap-2 sm:gap-4">
@@ -964,40 +960,59 @@ export function AbsoluteFocus({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3, delay: 0.3 }}
-                className="text-muted-foreground mt-4 text-sm italic sm:text-base"
+                className="text-muted-foreground/40 mt-4 text-sm italic sm:text-base"
               >
                 Tap anywhere to exit focus mode
               </motion.p>
             </motion.div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   )
+}
+
+export function MobileNavbar() {
+  const isAbsFocusMode = useAtomValue(showAbsoluteFocusAtom)
+  const [open, setIsOpen] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (isAbsFocusMode && open) setIsOpen(false)
+  }, [isAbsFocusMode])
 
   return (
-    <>
-      <div className="relative">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleFocusMode}
-          className={cn(
-            "transition-colors duration-300",
-            isFocusMode ? "bg-primary-foreground" : "",
-            className
-          )}
-          aria-label={isFocusMode ? "Exit focus mode" : "Enter focus mode"}
-        >
-          <TargetIcon className="h-4 w-4" />
-          <p className="text-muted-foreground">{label}</p>
-        </Button>
-      </div>
-
-      {/* Portal the overlay to document.body */}
-      {mounted &&
-        typeof document !== "undefined" &&
-        createPortal(<FocusOverlay />, document.body)}
-    </>
+    <div className="flex lg:hidden">
+      <Drawer open={!isAbsFocusMode && open} onOpenChange={setIsOpen}>
+        <DrawerTrigger asChild>
+          <Button variant="ghost" size="icon" onClick={() => setIsOpen(true)}>
+            <MenuIcon />
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent className="min-h-1/3">
+          <DrawerHeader>
+            <DrawerTitle>Menu</DrawerTitle>
+            <DrawerDescription></DrawerDescription>
+          </DrawerHeader>
+          <div className="mb-4 grid grid-cols-2 gap-4 px-4">
+            <AbsoluteFocusButton
+              className="flex h-24 w-full flex-col items-center justify-center rounded-[var(--radius)] border-2 border-dashed border-[var(--border)]"
+              label="Absolute Focus"
+            />
+            <AudioManager
+              className="flex h-24 w-full flex-col items-center justify-center rounded-[var(--radius)] border-2 border-dashed border-[var(--border)]"
+              label="Ambient Sounds"
+            />
+            <UserSettingNavButton
+              className="flex h-24 w-full flex-col items-center justify-center rounded-[var(--radius)] border-2 border-dashed border-[var(--border)]"
+              label="Settings"
+            />
+            <ThemeDropdown
+              className="flex h-24 w-full flex-col items-center justify-center rounded-[var(--radius)] border-2 border-dashed border-[var(--border)]"
+              label="Themes"
+            />
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </div>
   )
 }

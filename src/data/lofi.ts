@@ -25,8 +25,8 @@ export const LOFI_CHANNELS: VideoItem[] = [
     url: "https://www.youtube.com/watch?v=7NOSDKb0HlU",
   },
   {
-    title: "Cafe",
-    url: "https://www.youtube.com/watch?v=h2zkV-l_TbY",
+    title: "Interstellar Soft",
+    url: "https://www.youtube.com/watch?v=p2zMXSXhZ9M",
   },
 ]
 
