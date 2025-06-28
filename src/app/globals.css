@@ -138,6 +138,14 @@
   }
   body {
     @apply bg-background text-foreground;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    overflow-y: scroll;
+
     font-family: var(--font-geist-sans), Helvetica, Arial, sans-serif;
   }
+}
+
+body::-webkit-scrollbar {
+  display: none;
 }
