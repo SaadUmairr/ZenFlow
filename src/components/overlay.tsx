@@ -111,7 +111,9 @@ export function UserSettingNavButton({
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className={cn(className)}>
           <SettingsIcon className="h-4 w-4" />
-          <p className="text-muted-foreground">{label}</p>
+          {label?.trim() ? (
+            <p className="text-muted-foreground">{label}</p>
+          ) : null}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="font-[family-name:var(--font-geist-sans)]">
@@ -837,7 +839,7 @@ export function AbsoluteFocusButton({
       aria-label={isFocusMode ? "Exit focus mode" : "Enter focus mode"}
     >
       <TargetIcon className="h-4 w-4" />
-      <p className="text-muted-foreground">{label}</p>
+      {label?.trim() ? <p className="text-muted-foreground">{label}</p> : null}
     </Button>
   )
 }

@@ -27,7 +27,9 @@ export function ThemeDropdown({
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className={cn(className)}>
           <PaletteIcon absoluteStrokeWidth />
-          <p className="text-muted-foreground">{label}</p>
+          {label?.trim() ? (
+            <p className="text-muted-foreground">{label}</p>
+          ) : null}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -35,10 +37,13 @@ export function ThemeDropdown({
           <DropdownMenuItem
             key={t}
             onClick={() => setTheme(t)}
-            className="flex items-center justify-between capitalize"
+            className={cn(
+              "flex items-center justify-between capitalize",
+              theme === t && "bg-[var(--primary)]/50"
+            )}
           >
-            {t}
-            {theme === t && <Check className="h-4 w-4 text-[var(--primary)]" />}
+            {<p className={cn(theme === t && "font-bold")}>{t}</p>}
+            {theme === t && <Check className="h-4 w-4 text-[var(--accent)]" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

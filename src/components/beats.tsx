@@ -140,7 +140,9 @@ export function AudioManager({
             className={cn(className)}
           >
             <AudioLines className="h-4 w-4" />
-            <p className="text-muted-foreground">{label}</p>
+            {label?.trim() ? (
+              <p className="text-muted-foreground">{label}</p>
+            ) : null}
           </Button>
         </DrawerTrigger>
         <DrawerContent className="flex max-h-[80vh] flex-col">
