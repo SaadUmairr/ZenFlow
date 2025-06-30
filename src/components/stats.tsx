@@ -1,14 +1,22 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { allSessionSavedDataAtom, dailyGoalAtom } from "@/context/data"
+import {
+  allSessionSavedDataAtom,
+  dailyGoalAtom,
+  todoInfoAtom,
+} from "@/context/data"
+import { flowerLotus } from "@lucide/lab"
 import { useAtomValue } from "jotai"
 import {
   BarChart3Icon,
   CalendarIcon,
   ChartAreaIcon,
   ClockIcon,
+  CoffeeIcon,
   FlameIcon,
+  Icon,
+  SproutIcon,
   TrendingUpIcon,
 } from "lucide-react"
 
@@ -54,6 +62,7 @@ export function Stats() {
   // Gloabl states
   const dailyFocusGoal = useAtomValue(dailyGoalAtom)
   const sessionGlobal = useAtomValue(allSessionSavedDataAtom)
+  const todoStats = useAtomValue(todoInfoAtom)
 
   useEffect(() => {
     try {
@@ -220,6 +229,32 @@ export function Stats() {
               </div>
               <div className="text-muted-foreground text-xs">Today</div>
             </div>
+            <div className="bg-background col-span-2 rounded-lg p-3 text-center">
+              {todoStats.completed === 0 ? (
+                <CoffeeIcon
+                  absoluteStrokeWidth
+                  className="mx-auto mb-1 h-6 w-6 text-amber-600"
+                />
+              ) : todoStats.completed !== 0 &&
+                todoStats.completed !== todoStats.total ? (
+                <SproutIcon
+                  absoluteStrokeWidth
+                  className="mx-auto mb-1 h-6 w-6 text-green-400"
+                />
+              ) : (
+                <Icon
+                  absoluteStrokeWidth
+                  className="mx-auto mb-1 h-6 w-6 text-pink-500"
+                  iconNode={flowerLotus}
+                />
+              )}
+              <div className="text-lg font-bold">
+                {todoStats.completed > 0
+                  ? `${todoStats.completed} / ${todoStats.total}`
+                  : 0}
+              </div>
+              <div className="text-muted-foreground text-xs">Todos</div>
+            </div>
           </div>
 
           {/* Additional Details */}
@@ -309,6 +344,35 @@ export function Stats() {
                 </div>
               </div>
               <div className="text-muted-foreground text-xs">Today</div>
+            </div>
+
+            <div className="text-center">
+              <div className="mb-1 flex items-center gap-1">
+                {todoStats.completed === 0 ? (
+                  <CoffeeIcon
+                    absoluteStrokeWidth
+                    className="h-3 w-3 text-amber-600"
+                  />
+                ) : todoStats.completed !== 0 &&
+                  todoStats.completed !== todoStats.total ? (
+                  <SproutIcon
+                    absoluteStrokeWidth
+                    className="h-3 w-3 text-green-400"
+                  />
+                ) : (
+                  <Icon
+                    absoluteStrokeWidth
+                    className="h-4 w-4 text-pink-500"
+                    iconNode={flowerLotus}
+                  />
+                )}
+                <div className="text-lg font-bold">
+                  {todoStats.completed > 0
+                    ? `${todoStats.completed} / ${todoStats.total}`
+                    : 0}
+                </div>
+              </div>
+              <div className="text-muted-foreground text-xs">Todos</div>
             </div>
           </div>
 

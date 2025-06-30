@@ -1004,7 +1004,7 @@ export function MobileNavbar() {
               label="Absolute Focus"
             />
             <Button
-              variant='outline'
+              variant="outline"
               size="icon"
               className="flex h-24 w-full flex-col items-center justify-center rounded-[var(--radius)] border-2 border-dashed border-[var(--border)]"
               onClick={() => setOpenAmbientDrawer((prev) => !prev)}

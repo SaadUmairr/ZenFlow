@@ -8,6 +8,11 @@ interface PomodoroDurationType {
   break: number
 }
 
+export interface TodosInfo {
+  completed: number
+  total: number
+}
+
 const ONE_HOUR = 60 * 60 * 1000
 
 export const playerVolumeAtom = atom<number[]>([50])
@@ -36,3 +41,7 @@ export const allSessionSavedDataAtom = atom<SessionData[]>([])
 export const showAbsoluteFocusAtom = atom<boolean>(false)
 
 export const openAmbientDrawerAtom = atom<boolean>(false)
+
+const defaultTodosInfo: TodosInfo = { completed: 0, total: 0 }
+
+export const todoInfoAtom = atom<TodosInfo>(defaultTodosInfo)
