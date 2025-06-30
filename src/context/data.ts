@@ -34,3 +34,5 @@ export const PomodoroDurationsAtom = atom<PomodoroDurationType>({
 export const allSessionSavedDataAtom = atom<SessionData[]>([])
 
 export const showAbsoluteFocusAtom = atom<boolean>(false)
+
+export const openAmbientDrawerAtom = atom<boolean>(false)

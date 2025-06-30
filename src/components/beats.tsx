@@ -2,7 +2,9 @@
 
 import { useRef, useState } from "react"
 import dynamic from "next/dynamic"
+import { openAmbientDrawerAtom } from "@/context/data"
 import { SOUND_SCENES, SoundScene } from "@/data/sounds"
+import { useAtom } from "jotai"
 import { AudioLines, Play, Square } from "lucide-react"
 import { ReactPlayerProps } from "react-player"
 
@@ -86,6 +88,8 @@ export function AudioManager({
   const [readySounds, setReadySounds] = useState<Set<string>>(new Set())
   const playerRefs = useRef<Map<string, ReactPlayerProps>>(new Map())
 
+  const [drawerOpen, setDrawerOpen] = useAtom(openAmbientDrawerAtom)
+
   const toggleSound = (sceneId: string) => {
     const isActive = activeSounds.has(sceneId)
 
@@ -132,7 +136,7 @@ export function AudioManager({
 
   return (
     <div>
-      <Drawer>
+      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
         <DrawerTrigger asChild>
           <Button
             variant={activeSounds.size > 0 ? "default" : "ghost"}

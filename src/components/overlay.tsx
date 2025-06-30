@@ -7,6 +7,7 @@ import {
   dailyGoalAtom,
   isMediaPlayingAtom,
   isPomodoroBreakAtom,
+  openAmbientDrawerAtom,
   showAbsoluteFocusAtom,
   timerAtom,
 } from "@/context/data"
@@ -20,8 +21,9 @@ import {
   updateVideoList,
 } from "@/utils/idb.util"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useAtom, useAtomValue } from "jotai"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import {
+  AudioLines,
   Coffee,
   ListMusicIcon,
   MenuIcon,
@@ -69,7 +71,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-import { AudioManager } from "./beats"
 import { ThemeDropdown } from "./theme-toggle"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form"
 import { Input } from "./ui/input"
@@ -976,6 +977,8 @@ export function AbsoluteFocusOverlay(): JSX.Element {
 
 export function MobileNavbar() {
   const isAbsFocusMode = useAtomValue(showAbsoluteFocusAtom)
+  const setOpenAmbientDrawer = useSetAtom(openAmbientDrawerAtom)
+
   const [open, setIsOpen] = useState<boolean>(false)
 
   useEffect(() => {
@@ -1000,10 +1003,16 @@ export function MobileNavbar() {
               className="flex h-24 w-full flex-col items-center justify-center rounded-[var(--radius)] border-2 border-dashed border-[var(--border)]"
               label="Absolute Focus"
             />
-            <AudioManager
+            <Button
+              variant='outline'
+              size="icon"
               className="flex h-24 w-full flex-col items-center justify-center rounded-[var(--radius)] border-2 border-dashed border-[var(--border)]"
-              label="Ambient Sounds"
-            />
+              onClick={() => setOpenAmbientDrawer((prev) => !prev)}
+            >
+              <AudioLines className="h-4 w-4" />
+              <p className="text-muted-foreground">Ambient Sounds</p>
+            </Button>
+
             <UserSettingNavButton
               className="flex h-24 w-full flex-col items-center justify-center rounded-[var(--radius)] border-2 border-dashed border-[var(--border)]"
               label="Settings"
