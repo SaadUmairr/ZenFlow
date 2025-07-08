@@ -29,7 +29,7 @@ import { Slider } from "./ui/slider"
 export function PlayerControls() {
   const [isPlaying, setIsPlaying] = useAtom(isMediaPlayingAtom)
   const [volume, setVolume] = useAtom(playerVolumeAtom)
-  const videoProgress = useAtomValue(MediaProgressAtom)
+  const [videoProgress, setVideoProgress] = useAtom(MediaProgressAtom)
   const [currentlyPlayingMedia, setCurrentlyPlayingMedia] = useAtom(
     CurrentlyPlayingMediaAtom
   )
@@ -279,8 +279,10 @@ export function PlayerControls() {
             >
               <Slider
                 value={[videoProgress * 100]}
+                onValueChange={(value) => setVideoProgress(value[0])}
                 max={100}
                 step={0.1}
+                disabled
                 className="[&_[role=slider]]:bg-primary [&_[role=slider]]:border-primary-foreground [&_.slider-track]:bg-muted [&_.slider-range]:bg-primary w-full"
               />
             </motion.div>

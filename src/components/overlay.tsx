@@ -906,6 +906,22 @@ export function AbsoluteFocusOverlay(): JSX.Element {
   // Early return if in break mode
   const shouldShowFocusMode = isFocusMode && !isPomoBreak
 
+  useEffect(() => {
+    if (!shouldShowFocusMode) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsFocusMode(false)
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [shouldShowFocusMode, setIsFocusMode])
+
   return (
     <>
       <AnimatePresence mode="wait">

@@ -6,7 +6,6 @@ import { openAmbientDrawerAtom } from "@/context/data"
 import { SOUND_SCENES, SoundScene } from "@/data/sounds"
 import { useAtom } from "jotai"
 import { AudioLines, Play, Square } from "lucide-react"
-import { ReactPlayerProps } from "react-player"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -18,6 +17,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 
+// Updated import for v3 - using lazy loading
 const ReactPlayer = dynamic(() => import("react-player"), {
   ssr: false,
 })
@@ -86,7 +86,8 @@ export function AudioManager({
   const [activeSounds, setActiveSounds] = useState<Set<string>>(new Set())
   const [loadingSounds, setLoadingSounds] = useState<Set<string>>(new Set())
   const [readySounds, setReadySounds] = useState<Set<string>>(new Set())
-  const playerRefs = useRef<Map<string, ReactPlayerProps>>(new Map())
+
+  const playerRefs = useRef<Map<string, unknown>>(new Map())
 
   const [drawerOpen, setDrawerOpen] = useAtom(openAmbientDrawerAtom)
 
@@ -207,23 +208,26 @@ export function AudioManager({
         {SOUND_SCENES.map((scene) => (
           <ReactPlayer
             key={scene.id}
-            ref={(player: ReactPlayerProps) => {
+            ref={(player) => {
               if (player) playerRefs.current.set(scene.id, player)
             }}
-            url={scene.url}
+            src={scene.url}
             playing={activeSounds.has(scene.id)}
             loop
             volume={0.7}
             width="1px"
             height="1px"
-            onReady={() => handlePlayerReady(scene.id)}
-            onStart={() => handlePlayerStart(scene.id)}
-            onBuffer={() => {
+            wrapper={undefined}
+            onReady={() => {
+              handlePlayerReady(scene.id)
+            }}
+            onPlay={() => handlePlayerStart(scene.id)}
+            onWaiting={() => {
               if (activeSounds.has(scene.id)) {
                 setLoadingSounds((prev) => new Set(prev).add(scene.id))
               }
             }}
-            onBufferEnd={() => {
+            onPlaying={() => {
               setLoadingSounds((prev) => {
                 const next = new Set(prev)
                 next.delete(scene.id)

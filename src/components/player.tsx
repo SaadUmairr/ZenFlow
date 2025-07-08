@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils"
 
 import { PlayerControls } from "./controls"
 
-const ReactPlayer = dynamic(() => import("react-player/youtube"), {
+const ReactPlayer = dynamic(() => import("react-player"), {
   ssr: false,
 })
 
@@ -36,26 +36,40 @@ export function Player({ hidden = false }: { hidden?: boolean }) {
             <ReactPlayer
               loop
               style={{ borderRadius: "var(--radius)", overflow: "hidden" }}
-              url={currentChannel}
+              src={currentChannel}
               width="100%"
               height="100%"
               controls={false}
+              playsInline
+              wrapper={undefined}
               onPlay={() => setIsMediaPlaying(true)}
               onPause={() => setIsMediaPlaying(false)}
               playing={isMediaPlaying}
               volume={volume[0] / 100}
-              onProgress={({ played }) => {
-                setVideoProgress(played)
+              onTimeUpdate={(event) => {
+                const target = event.target as HTMLMediaElement
+
+                const duration = target.duration
+                const currentTime = target.currentTime
+
+                if (!duration || isNaN(duration)) {
+                  console.warn("Video duration is not ready yet")
+                  return
+                }
+                const percentage = currentTime / duration
+                setVideoProgress(percentage)
               }}
-              progressInterval={500}
               config={{
-                playerVars: {
-                  controls: 0,
-                  playing: 1,
-                  modestbranding: 1,
-                  iv_load_policy: 3,
-                  rel: 0,
-                  showinfo: 0,
+                youtube: {
+                  playerVars: {
+                    modestbranding: 1,
+                    rel: 0,
+                    showinfo: 0,
+                    iv_load_policy: 3,
+                    disablekb: 0,
+                    fs: 1,
+                    cc_load_policy: 0,
+                  },
                 },
               }}
             />
