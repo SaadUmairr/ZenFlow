@@ -5,7 +5,7 @@ import dynamic from "next/dynamic"
 import { openAmbientDrawerAtom } from "@/context/data"
 import { SOUND_SCENES, SoundScene } from "@/data/sounds"
 import { useAtom } from "jotai"
-import { AudioLines, Play, Square } from "lucide-react"
+import { AudioLines, PlayIcon, Square } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -188,7 +188,7 @@ export function AudioManager({
             {activeSounds.size > 0 && (
               <div className="bg-muted/50 mt-6 rounded-lg p-4">
                 <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                  <Play className="h-4 w-4" />
+                  <PlayIcon className="h-4 w-4" />
                   <span>
                     Playing: &nbsp;
                     {Array.from(activeSounds)
@@ -236,16 +236,10 @@ export function AudioManager({
             }}
             config={{
               youtube: {
-                playerVars: {
-                  autoplay: 0,
-                  controls: 0,
-                  disablekb: 1,
-                  fs: 0,
-                  iv_load_policy: 3,
-                  modestbranding: 1,
-                  rel: 0,
-                  showinfo: 0,
-                },
+                disablekb: 0,
+                rel: 0,
+                fs: 1,
+                iv_load_policy: 3,
               },
             }}
           />

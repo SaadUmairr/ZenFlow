@@ -61,15 +61,10 @@ export function Player({ hidden = false }: { hidden?: boolean }) {
               }}
               config={{
                 youtube: {
-                  playerVars: {
-                    modestbranding: 1,
-                    rel: 0,
-                    showinfo: 0,
-                    iv_load_policy: 3,
-                    disablekb: 0,
-                    fs: 1,
-                    cc_load_policy: 0,
-                  },
+                  disablekb: 0,
+                  rel: 0,
+                  fs: 1,
+                  iv_load_policy: 3,
                 },
               }}
             />
