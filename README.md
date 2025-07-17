@@ -104,7 +104,7 @@ _(Click thumbnail to play)_
 
 #### 🎶 Ambient Sound Page
 
-![Ambient Sounds](https://dxrzx5m4k5m8.cloudfront.net/assets/projects/zenflow/ambientSound.png)
+![Ambient Sounds](https://dxrzx5m4k5m8.cloudfront.net/assets/projects/zenflow/ambientSounds.png)
 
 ---
 
