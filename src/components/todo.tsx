@@ -256,6 +256,8 @@ function TodoInput({
                   "hover:border-[var(--border)] hover:bg-[var(--accent)]",
                   "transition-all duration-200 ease-in-out"
                 )}
+                name="Todo Submit"
+                aria-label="Todo Submit"
               >
                 <PlusIcon className="h-4 w-4" />
               </Button>

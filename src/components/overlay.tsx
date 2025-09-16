@@ -116,7 +116,13 @@ export function UserSettingNavButton({
       <Tooltip>
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className={cn(className)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(className)}
+              name="Settings"
+              aria-label="Settings"
+            >
               <SettingsIcon className="h-4 w-4" />
               {label?.trim() ? (
                 <p className="text-muted-foreground">{label}</p>
@@ -397,7 +403,13 @@ export function AllVideoPanel() {
     <>
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="relative">
+          <Button
+            variant="outline"
+            size="icon"
+            className="relative"
+            name="All Videos"
+            aria-label="All Videos"
+          >
             <ListMusicIcon className="h-4 w-4 text-[var(--foreground)]" />
           </Button>
         </SheetTrigger>
@@ -851,6 +863,7 @@ export function AbsoluteFocusButton({
             className
           )}
           aria-label={isFocusMode ? "Exit focus mode" : "Enter focus mode"}
+          name="Absolute Focus"
         >
           <TargetIcon className="h-4 w-4" />
           {label?.trim() ? (

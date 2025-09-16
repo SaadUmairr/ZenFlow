@@ -120,6 +120,8 @@ export function PlayerControls() {
               size="sm"
               onClick={() => handleChannelChange("prev")}
               className="hover:bg-accent hover:text-accent-foreground h-8 w-8 transition-colors"
+              name="Previous"
+              aria-label="Previous"
             >
               <SkipBackIcon className="h-3 w-3" />
             </Button>
@@ -127,6 +129,8 @@ export function PlayerControls() {
               size="sm"
               onClick={() => setIsPlaying(!isPlaying)}
               className="hover:bg-accent hover:text-accent-foreground h-9 w-9 transition-colors"
+              name="Toggle Play"
+              aria-label="Toggle Play"
             >
               {isPlaying ? (
                 <PauseIcon className="h-4 w-4" />
@@ -138,6 +142,8 @@ export function PlayerControls() {
               size="sm"
               onClick={() => handleChannelChange("next")}
               className="hover:bg-accent hover:text-accent-foreground h-8 w-8 transition-colors"
+              name="Forward"
+              aria-label="Forward"
             >
               <SkipForwardIcon className="h-3 w-3" />
             </Button>
@@ -155,6 +161,8 @@ export function PlayerControls() {
                 size="icon"
                 onClick={handleMuteToggle}
                 className="hover:bg-accent hover:text-accent-foreground border-border relative z-10 transition-all duration-300 hover:scale-105"
+                name="Toggle Mute"
+                aria-label="Toggle Mute"
               >
                 <motion.div
                   initial={false}
@@ -211,6 +219,8 @@ export function PlayerControls() {
                       size="sm"
                       onClick={() => handleVolumeChange("down")}
                       className="hover:bg-destructive/10 hover:text-destructive border-border h-7 w-7 transition-all duration-200 hover:scale-110"
+                      name="Decrease Volume"
+                      aria-label="Decrease Volume"
                     >
                       <MinusIcon className="h-3 w-3" />
                     </Button>
@@ -223,6 +233,8 @@ export function PlayerControls() {
                         max={100}
                         step={1}
                         className="[&_[role=slider]]:bg-primary [&_[role=slider]]:border-primary-foreground [&_.slider-track]:bg-muted [&_.slider-range]:bg-primary flex-1"
+                        name="Volume Slider"
+                        aria-label="Volume Slider"
                       />
                       <motion.span
                         className="text-muted-foreground min-w-[32px] shrink-0 text-xs font-medium"
@@ -246,6 +258,8 @@ export function PlayerControls() {
                       size="sm"
                       onClick={() => handleVolumeChange("up")}
                       className="hover:bg-accent/20 hover:text-accent-foreground border-border h-7 w-7 transition-all duration-200 hover:scale-110"
+                      name="Increase Volume"
+                      aria-label="Increase Volume"
                     >
                       <PlusIcon className="h-3 w-3" />
                     </Button>
@@ -284,6 +298,8 @@ export function PlayerControls() {
                 step={0.1}
                 disabled
                 className="[&_[role=slider]]:bg-primary [&_[role=slider]]:border-primary-foreground [&_.slider-track]:bg-muted [&_.slider-range]:bg-primary w-full"
+                name="Progress"
+                aria-label="Progress"
               />
             </motion.div>
 
@@ -310,6 +326,8 @@ export function PlayerControls() {
               size="sm"
               onClick={() => handleChannelChange("prev")}
               className="hover:bg-accent hover:text-accent-foreground border-border h-8 w-8 transition-colors"
+              name="Previous Channel"
+              aria-label="Previous Channel"
             >
               <SkipBackIcon className="h-3 w-3" />
             </Button>
@@ -318,6 +336,8 @@ export function PlayerControls() {
               size="sm"
               onClick={() => setIsPlaying(!isPlaying)}
               className="hover:bg-accent hover:text-accent-foreground border-border h-9 w-9 transition-colors"
+              name="Toggle Play"
+              aria-label="Toggle Play"
             >
               {isPlaying ? (
                 <PauseIcon className="h-4 w-4" />
@@ -330,6 +350,7 @@ export function PlayerControls() {
               size="sm"
               onClick={() => handleChannelChange("next")}
               className="hover:bg-accent hover:text-accent-foreground border-border h-8 w-8 transition-colors"
+              name="Forward Channel"
             >
               <SkipForwardIcon className="h-3 w-3" />
             </Button>
@@ -341,6 +362,8 @@ export function PlayerControls() {
               size="icon"
               onClick={handleMuteToggle}
               className="hover:bg-accent hover:text-accent-foreground border-border h-8 w-8 transition-colors"
+              name="Mute Toggle"
+              aria-label="Mute Toggle"
             >
               {volume[0] === 0 ? (
                 <VolumeOffIcon className="h-3 w-3" />
@@ -359,6 +382,8 @@ export function PlayerControls() {
             max={100}
             step={0.1}
             className="[&_[role=slider]]:bg-primary [&_[role=slider]]:border-primary-foreground [&_.slider-track]:bg-muted [&_.slider-range]:bg-primary flex-1"
+            name="Video Progress"
+            aria-label="Video Progress"
           />
           <div className="flex min-w-[120px] items-center gap-1">
             <Slider
@@ -367,6 +392,8 @@ export function PlayerControls() {
               max={100}
               step={1}
               className="[&_[role=slider]]:bg-primary [&_[role=slider]]:border-primary-foreground [&_.slider-track]:bg-muted [&_.slider-range]:bg-primary flex-1"
+              name="Volume Slider"
+              aria-label="Volume Slider"
             />
             <span className="text-muted-foreground min-w-[28px] text-xs">
               {volume[0]}%

@@ -149,6 +149,8 @@ export function AudioManager({
                 variant={activeSounds.size > 0 ? "default" : "ghost"}
                 size="icon"
                 className={cn(className)}
+                name="Beats"
+                aria-label="Beats"
               >
                 <AudioLines className="h-4 w-4" />
                 {label?.trim() ? (

@@ -84,7 +84,13 @@ export function ThemeDropdown({
       <Tooltip>
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className={cn(className)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(className)}
+              name="Theme Toggler"
+              aria-label="Theme Toggler"
+            >
               <PaletteIcon absoluteStrokeWidth />
               {label?.trim() ? (
                 <p className="text-muted-foreground">{label}</p>
