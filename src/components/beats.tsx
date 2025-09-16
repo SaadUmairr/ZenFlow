@@ -17,7 +17,6 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 
-// Updated import for v3 - using lazy loading
 const ReactPlayer = dynamic(() => import("react-player"), {
   ssr: false,
 })
@@ -150,7 +149,12 @@ export function AudioManager({
             ) : null}
           </Button>
         </DrawerTrigger>
-        <DrawerContent className="flex max-h-[80vh] flex-col">
+        <DrawerContent
+          className="pointer-events-auto fixed inset-x-0 bottom-0 z-[100] mt-24 flex max-h-[96vh] flex-col"
+          style={{
+            touchAction: "pan-y",
+          }}
+        >
           <DrawerHeader className="relative flex-shrink-0">
             <DrawerTitle className="text-center text-2xl font-bold">
               Ambient Sounds
@@ -170,7 +174,17 @@ export function AudioManager({
             )}
           </DrawerHeader>
 
-          <div className="flex-1 overflow-y-auto px-6 pb-6">
+          {/* SCROLLABLE AREA */}
+          <div
+            className="min-h-0 flex-1 overscroll-y-contain px-6 pb-6"
+            style={{
+              overflowY: "auto",
+              WebkitOverflowScrolling: "touch",
+              touchAction: "pan-y",
+            }}
+            onWheel={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+          >
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               {SOUND_SCENES.map((scene) => (
                 <BeatCard

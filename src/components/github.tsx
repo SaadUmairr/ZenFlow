@@ -3,8 +3,8 @@
 import Image from "next/image"
 import Link from "next/link"
 
-import GitHubLogo from "../../public/github.svg"
 import { Button } from "./ui/button"
+import GitHubLogo from "/github.svg"
 
 export function Github() {
   return (

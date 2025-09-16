@@ -390,10 +390,10 @@ export function AllVideoPanel() {
           </Button>
         </SheetTrigger>
 
-        <SheetContent className="flex h-full w-full flex-col overflow-y-auto bg-[var(--popover)] px-0 py-0 font-[family-name:var(--font-geist-sans)] text-[var(--popover-foreground)] sm:max-w-lg">
+        <SheetContent className="flex h-full w-full flex-col bg-[var(--popover)] p-0 font-[family-name:var(--font-geist-sans)] text-[var(--popover-foreground)] sm:max-w-lg">
           <div className="flex h-full flex-col">
-            {/* Header */}
-            <div className="border-b border-[var(--border)] px-6 py-4">
+            {/* Header - Fixed at top */}
+            <div className="shrink-0 border-b border-[var(--border)] px-6 py-4">
               <SheetHeader className="space-y-2">
                 <SheetTitle className="flex items-center gap-2 text-[var(--foreground)]">
                   <VideoIcon className="h-5 w-5 text-[var(--foreground)]" />
@@ -433,9 +433,9 @@ export function AllVideoPanel() {
               </div>
             </div>
 
-            {/* Content */}
-            <ScrollArea className="flex-1 px-6">
-              <div className="py-4">
+            {/* Scrollable Content - Takes remaining space */}
+            <div className="flex-1 overflow-hidden">
+              <div className="h-full overflow-y-auto px-6 py-4">
                 <AnimatePresence mode="wait">
                   {filteredVideos.length === 0 ? (
                     videos.length === 0 ? (
@@ -497,11 +497,11 @@ export function AllVideoPanel() {
                   )}
                 </AnimatePresence>
               </div>
-            </ScrollArea>
+            </div>
 
-            {/* Footer */}
+            {/* Footer - Fixed at bottom */}
             {videos.length > 0 && (
-              <div className="border-t border-[var(--border)] px-6 py-3">
+              <div className="shrink-0 border-t border-[var(--border)] px-6 py-3">
                 <div className="flex items-center justify-between text-sm text-[var(--muted-foreground)]">
                   <span>
                     {filteredVideos.length} of {videos.length} video
@@ -559,7 +559,6 @@ export function AllVideoPanel() {
     </>
   )
 }
-
 export function DailyGoalDrawerTrigger({ name = false }: { name?: boolean }) {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [dailyGoal, setDailyGoal] = useAtom(dailyGoalAtom)
@@ -581,7 +580,7 @@ export function DailyGoalDrawerTrigger({ name = false }: { name?: boolean }) {
           <SquarePenIcon /> {name ? "Daily Goal" : ""}
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="min-h-1/4 font-[family-name:var(--font-geist-sans)]">
+      <DrawerContent className="font-[family-name:var(--font-geist-sans)]">
         <DrawerHeader>
           <DrawerTitle>Move Goal</DrawerTitle>
           <DrawerDescription>Set your daily focus goal</DrawerDescription>
@@ -1009,7 +1008,7 @@ export function MobileNavbar() {
             <MenuIcon />
           </Button>
         </DrawerTrigger>
-        <DrawerContent className="min-h-1/3">
+        <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Menu</DrawerTitle>
             <DrawerDescription></DrawerDescription>

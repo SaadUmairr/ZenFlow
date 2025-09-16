@@ -1,10 +1,49 @@
-version: '3.8'
-
 services:
-  web:
-    build: .
+  zenflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: zenflow
+    restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
-    command: pnpm start
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+    healthcheck:
+      test:
+        ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - zenflow-network
+    volumes:
+      - ./logs:/app/logs:rw
+    labels:
+      - "com.zenflow.description=ZenFlow productivity application"
+      - "com.zenflow.version=1.0"
+
+networks:
+  zenflow-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1500
+
+volumes:
+  zenflow-logs:
+    driver: local
