@@ -70,12 +70,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 import { ThemeDropdown } from "./theme-toggle"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
-import { ScrollArea } from "./ui/scroll-area"
 import {
   Sheet,
   SheetContent,
@@ -109,14 +113,22 @@ export function UserSettingNavButton({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className={cn(className)}>
-          <SettingsIcon className="h-4 w-4" />
-          {label?.trim() ? (
-            <p className="text-muted-foreground">{label}</p>
-          ) : null}
-        </Button>
-      </DropdownMenuTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className={cn(className)}>
+              <SettingsIcon className="h-4 w-4" />
+              {label?.trim() ? (
+                <p className="text-muted-foreground">{label}</p>
+              ) : null}
+            </Button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Settings</p>
+        </TooltipContent>
+      </Tooltip>
+
       <DropdownMenuContent className="font-[family-name:var(--font-geist-sans)]">
         {/* <DropdownMenuLabel>Settings</DropdownMenuLabel> */}
         <DropdownMenuSeparator />
@@ -827,20 +839,29 @@ export function AbsoluteFocusButton({
   }, [isFocusMode, handleFullscreenToggle])
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={toggleFocusMode}
-      className={cn(
-        "transition-colors",
-        isFocusMode ? "text-primary-foreground" : "",
-        className
-      )}
-      aria-label={isFocusMode ? "Exit focus mode" : "Enter focus mode"}
-    >
-      <TargetIcon className="h-4 w-4" />
-      {label?.trim() ? <p className="text-muted-foreground">{label}</p> : null}
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleFocusMode}
+          className={cn(
+            "transition-colors",
+            isFocusMode ? "text-primary-foreground" : "",
+            className
+          )}
+          aria-label={isFocusMode ? "Exit focus mode" : "Enter focus mode"}
+        >
+          <TargetIcon className="h-4 w-4" />
+          {label?.trim() ? (
+            <p className="text-muted-foreground">{label}</p>
+          ) : null}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>Absolute Focus</p>
+      </TooltipContent>
+    </Tooltip>
   )
 }
 

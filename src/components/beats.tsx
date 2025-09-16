@@ -16,6 +16,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 const ReactPlayer = dynamic(() => import("react-player"), {
   ssr: false,
@@ -137,18 +142,25 @@ export function AudioManager({
   return (
     <div>
       <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DrawerTrigger asChild>
-          <Button
-            variant={activeSounds.size > 0 ? "default" : "ghost"}
-            size="icon"
-            className={cn(className)}
-          >
-            <AudioLines className="h-4 w-4" />
-            {label?.trim() ? (
-              <p className="text-muted-foreground">{label}</p>
-            ) : null}
-          </Button>
-        </DrawerTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DrawerTrigger asChild>
+              <Button
+                variant={activeSounds.size > 0 ? "default" : "ghost"}
+                size="icon"
+                className={cn(className)}
+              >
+                <AudioLines className="h-4 w-4" />
+                {label?.trim() ? (
+                  <p className="text-muted-foreground">{label}</p>
+                ) : null}
+              </Button>
+            </DrawerTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Beats</p>
+          </TooltipContent>
+        </Tooltip>
         <DrawerContent
           className="pointer-events-auto fixed inset-x-0 bottom-0 z-[100] mt-24 flex max-h-[96vh] flex-col"
           style={{

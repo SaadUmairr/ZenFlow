@@ -12,6 +12,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { themes } from "@/styles/themes"
 
 export function ThemeDropdown({
@@ -76,14 +81,22 @@ export function ThemeDropdown({
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className={cn(className)}>
-          <PaletteIcon absoluteStrokeWidth />
-          {label?.trim() ? (
-            <p className="text-muted-foreground">{label}</p>
-          ) : null}
-        </Button>
-      </DropdownMenuTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className={cn(className)}>
+              <PaletteIcon absoluteStrokeWidth />
+              {label?.trim() ? (
+                <p className="text-muted-foreground">{label}</p>
+              ) : null}
+            </Button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Themes</p>
+        </TooltipContent>
+      </Tooltip>
+
       <DropdownMenuContent align="end">
         {themes.map((t) => (
           <DropdownMenuItem
