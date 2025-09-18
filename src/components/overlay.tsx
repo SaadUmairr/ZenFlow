@@ -393,6 +393,7 @@ export function AllVideoPanel() {
   const handleRemoveAll = () => {
     setVideos([])
     setRemoveAllDialog(false)
+    clearStoreByName("video")
   }
 
   const filteredVideos = videos.filter((video) =>
@@ -403,20 +404,12 @@ export function AllVideoPanel() {
     <>
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          <Button
-            variant="outline"
-            size="icon"
-            className="relative"
-            name="All Videos"
-            aria-label="All Videos"
-          >
+          <Button variant="outline" size="icon" className="relative">
             <ListMusicIcon className="h-4 w-4 text-[var(--foreground)]" />
           </Button>
         </SheetTrigger>
-
-        <SheetContent className="flex h-full w-full flex-col bg-[var(--popover)] p-0 font-[family-name:var(--font-geist-sans)] text-[var(--popover-foreground)] sm:max-w-lg">
-          <div className="flex h-full flex-col">
-            {/* Header - Fixed at top */}
+        <SheetContent className="flex w-full flex-col bg-[var(--popover)] p-0 font-[family-name:var(--font-geist-sans)] text-[var(--popover-foreground)] sm:max-w-lg">
+          <div className="flex h-full min-h-0 flex-col">
             <div className="shrink-0 border-b border-[var(--border)] px-6 py-4">
               <SheetHeader className="space-y-2">
                 <SheetTitle className="flex items-center gap-2 text-[var(--foreground)]">
@@ -428,7 +421,7 @@ export function AllVideoPanel() {
                 </SheetDescription>
               </SheetHeader>
 
-              {/* Search Bar */}
+              {/* Search + Actions */}
               {videos.length > 0 && (
                 <div className="mt-4">
                   <Input
@@ -440,7 +433,6 @@ export function AllVideoPanel() {
                 </div>
               )}
 
-              {/* Action Buttons */}
               <div className="mt-4 flex gap-2">
                 <AddVideoDialog />
                 {videos.length > 0 && (
@@ -457,9 +449,19 @@ export function AllVideoPanel() {
               </div>
             </div>
 
-            {/* Scrollable Content - Takes remaining space */}
-            <div className="flex-1 overflow-hidden">
-              <div className="h-full overflow-y-auto px-6 py-4">
+            <div
+              className="min-h-0 flex-1 overflow-hidden"
+              onWheel={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+              style={{ touchAction: "pan-y" }}
+            >
+              <div
+                className="h-full overflow-y-auto px-6 py-4"
+                style={{
+                  WebkitOverflowScrolling: "touch",
+                  touchAction: "pan-y",
+                }}
+              >
                 <AnimatePresence mode="wait">
                   {filteredVideos.length === 0 ? (
                     videos.length === 0 ? (
@@ -523,7 +525,7 @@ export function AllVideoPanel() {
               </div>
             </div>
 
-            {/* Footer - Fixed at bottom */}
+            {/* Footer  */}
             {videos.length > 0 && (
               <div className="shrink-0 border-t border-[var(--border)] px-6 py-3">
                 <div className="flex items-center justify-between text-sm text-[var(--muted-foreground)]">
@@ -583,6 +585,7 @@ export function AllVideoPanel() {
     </>
   )
 }
+
 export function DailyGoalDrawerTrigger({ name = false }: { name?: boolean }) {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [dailyGoal, setDailyGoal] = useAtom(dailyGoalAtom)
