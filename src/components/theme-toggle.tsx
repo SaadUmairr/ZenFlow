@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Check, PaletteIcon } from "lucide-react"
 import { useTheme } from "next-themes"
 
@@ -19,6 +19,23 @@ import {
 } from "@/components/ui/tooltip"
 import { themes } from "@/styles/themes"
 
+// Debounce hook for performance optimization
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
+}
+
 export function ThemeDropdown({
   className,
   label,
@@ -30,45 +47,102 @@ export function ThemeDropdown({
   const [previewTheme, setPreviewTheme] = useState<string | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const originalTheme = useRef<string | undefined>(null)
+  const previewTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isPreviewingRef = useRef(false)
 
+  // Debounce theme preview to avoid excessive DOM updates
+  const debouncedPreviewTheme = useDebounce(previewTheme, 150)
+
+  // Store original theme when dropdown opens
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !originalTheme.current) {
       originalTheme.current = theme
     }
   }, [isOpen, theme])
 
+  // Apply preview theme with debouncing
   useEffect(() => {
-    if (previewTheme && isOpen) {
-      document.documentElement.setAttribute("data-theme", previewTheme)
+    if (debouncedPreviewTheme && isOpen && isPreviewingRef.current) {
+      document.documentElement.setAttribute("data-theme", debouncedPreviewTheme)
       document.documentElement.className =
         document.documentElement.className.replace(/theme-\w+/g, "") +
-        ` theme-${previewTheme}`
+        ` theme-${debouncedPreviewTheme}`
     }
-  }, [previewTheme, isOpen])
+  }, [debouncedPreviewTheme, isOpen])
+
+  // Memoized function to apply theme to DOM
+  const applyThemeToDOM = useCallback((themeName: string) => {
+    document.documentElement.setAttribute("data-theme", themeName)
+    document.documentElement.className =
+      document.documentElement.className.replace(/theme-\w+/g, "") +
+      ` theme-${themeName}`
+  }, [])
+
+  // Restore original theme when closing dropdown without selection
+  const restoreOriginalTheme = useCallback(() => {
+    if (originalTheme.current) {
+      applyThemeToDOM(originalTheme.current)
+    }
+  }, [applyThemeToDOM])
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open)
+
     if (!open) {
-      if (previewTheme && originalTheme.current) {
-        document.documentElement.setAttribute(
-          "data-theme",
-          originalTheme.current
-        )
-        document.documentElement.className =
-          document.documentElement.className.replace(/theme-\w+/g, "") +
-          ` theme-${originalTheme.current}`
+      // Clear any pending timeouts
+      if (previewTimeoutRef.current) {
+        clearTimeout(previewTimeoutRef.current)
+        previewTimeoutRef.current = null
       }
+
+      // Only restore if we were previewing and haven't selected a new theme
+      if (isPreviewingRef.current && previewTheme !== theme) {
+        restoreOriginalTheme()
+      }
+
+      // Reset states
       setPreviewTheme(null)
+      isPreviewingRef.current = false
+      originalTheme.current = null
     }
   }
 
   const handleThemePreview = (themeName: string) => {
+    // Clear any existing timeout
+    if (previewTimeoutRef.current) {
+      clearTimeout(previewTimeoutRef.current)
+    }
+
+    isPreviewingRef.current = true
     setPreviewTheme(themeName)
   }
 
+  const handleThemePreviewEnd = () => {
+    // Add a small delay before clearing preview to avoid flickering
+    previewTimeoutRef.current = setTimeout(() => {
+      if (isPreviewingRef.current) {
+        setPreviewTheme(null)
+        restoreOriginalTheme()
+        isPreviewingRef.current = false
+      }
+    }, 100)
+  }
+
   const handleThemeSelect = (themeName: string) => {
+    // Clear any pending timeouts
+    if (previewTimeoutRef.current) {
+      clearTimeout(previewTimeoutRef.current)
+      previewTimeoutRef.current = null
+    }
+
+    // Set the theme permanently
     setTheme(themeName)
+    applyThemeToDOM(themeName)
+
+    // Reset states and close dropdown
     setPreviewTheme(null)
+    isPreviewingRef.current = false
+    originalTheme.current = null
     setIsOpen(false)
   }
 
@@ -78,6 +152,30 @@ export function ThemeDropdown({
       handleThemeSelect(themeName)
     }
   }
+
+  const handleMouseEnter = (themeName: string) => {
+    handleThemePreview(themeName)
+  }
+
+  const handleMouseLeave = () => {
+    handleThemePreviewEnd()
+  }
+
+  const handleFocus = (themeName: string) => {
+    handleThemePreview(themeName)
+  }
+
+  const handleBlur = () => {
+    handleThemePreviewEnd()
+  }
+
+  useEffect(() => {
+    return () => {
+      if (previewTimeoutRef.current) {
+        clearTimeout(previewTimeoutRef.current)
+      }
+    }
+  }, [])
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
@@ -108,10 +206,10 @@ export function ThemeDropdown({
           <DropdownMenuItem
             key={t}
             onClick={() => handleThemeSelect(t)}
-            onMouseEnter={() => handleThemePreview(t)}
-            onMouseLeave={() => setPreviewTheme(null)}
-            onFocus={() => handleThemePreview(t)}
-            onBlur={() => setPreviewTheme(null)}
+            onMouseEnter={() => handleMouseEnter(t)}
+            onMouseLeave={handleMouseLeave}
+            onFocus={() => handleFocus(t)}
+            onBlur={handleBlur}
             onKeyDown={(e) => handleKeyDown(e, t)}
             className={cn(
               "flex cursor-pointer items-center justify-between capitalize",
